@@ -1,52 +1,98 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Agendamento - Dra Bruna Giacomazzi</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&family=Cormorant+Garamond:wght@700&display=swap" rel="stylesheet">
+<title>Agendamento - Dra Bruna</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Cormorant+Garamond:wght@700&display=swap" rel="stylesheet">
 <style>
-:root{--vinho:#6A1B2A;--creme:#FFF8F5} *{margin:0;padding:0;box-sizing:border-box} body{background:var(--creme);font-family:Montserrat;display:flex;justify-content:center;padding:20px}
-.chat{width:100%;max-width:420px;background:white;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.12);border-top:7px solid var(--vinho);display:flex;flex-direction:column;height:92vh}
-.header{background:var(--vinho);color:white;padding:16px;text-align:center}
-.header h2{font-family:Cormorant Garamond;font-size:24px}.header span{font-size:11px;opacity:.8}
-.msgs{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#FFF8F5}
-.msg{padding:10px 14px;border-radius:14px;max-width:85%;font-size:13px;line-height:1.5}.bot{background:white;border:1px solid #eee;align-self:flex-start}.user{background:var(--vinho);color:white;align-self:flex-end}
-.input-area{display:flex;gap:8px;padding:12px;background:white;border-top:1px solid #eee}.input-area input{flex:1;padding:12px;border-radius:12px;border:1px solid #ddd}.btn{background:var(--vinho);color:white;border:none;padding:12px 18px;border-radius:12px;cursor:pointer}
-.horarios{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}.horarios button{padding:8px;border-radius:8px;border:1px solid var(--vinho);background:white;cursor:pointer;font-size:12px}.horarios button:disabled{background:#ddd;border-color:#ddd}.horarios button.livre:hover{background:var(--vinho);color:white}
+:root{--vinho:#6A1B2A;--creme:#FFF8F5}*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(180deg,#FFF8F5 0%, #ffe9e2 100%);font-family:Montserrat;display:flex;justify-content:center;padding:18px;min-height:100vh}
+.chat{width:100%;max-width:420px;background:white;border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(106,27,42,.18);display:flex;flex-direction:column;height:94vh;border:1px solid #f1d5cb}
+.top{background:var(--vinho);color:white;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.avatar{width:44px;height:44px;border-radius:50%;background:white;color:var(--vinho);display:grid;place-items:center;font-weight:700}
+.online{width:8px;height:8px;background:#4eff4e;border-radius:50%;display:inline-block;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.msgs{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:#FFF8F5}
+.msg{padding:12px 16px;border-radius:18px;max-width:82%;font-size:13.5px;line-height:1.5;animation:pop.3s ease}
+@keyframes pop{0%{transform:translateY(8px) scale(.98);opacity:0}100%{transform:none;opacity:1}}
+.bot{background:white;border:1px solid #eee;align-self:flex-start;border-bottom-left-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.04)}
+.user{background:var(--vinho);color:white;align-self:flex-end;border-bottom-right-radius:4px}
+.typing{font-size:11px;color:#999;padding:0 18px;display:none}
+.quick{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.quick button{padding:8px 14px;border-radius:20px;border:1px solid var(--vinho);background:white;font-size:12px;cursor:pointer;transition:.2s}.quick button:hover{background:var(--vinho);color:white}
+.horarios{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.horarios button{padding:10px;border-radius:12px;border:1px solid var(--vinho);background:white;cursor:pointer;font-size:12px;font-weight:600}.horarios button:disabled{background:#eee;border-color:#eee;color:#999}.horarios button.livre:hover{background:var(--vinho);color:white;transform:translateY(-1px)}
+.input-area{display:flex;gap:10px;padding:12px;background:white;border-top:1px solid #eee}
+.input-area input{flex:1;padding:13px 16px;border-radius:24px;border:1px solid #ddd;outline:none}
+.send{background:var(--vinho);color:white;border:none;width:46px;height:46px;border-radius:50%;cursor:pointer;font-size:18px}
+.card-ok{background:linear-gradient(135deg,#6A1B2A,#8C2A3D);color:white;padding:16px;border-radius:16px;margin-top:6px}
 </style>
 </head><body>
 <div class="chat">
-<div class="header"><h2>Dra. Bruna Giacomazzi</h2><span>Secretária Virtual • Seg-Sex 08h às 17h • Intervalo 30min</span></div>
-<div class="msgs" id="msgs"></div>
-<div class="input-area"><input id="input" placeholder="Digite seu CPF (11 números)"><button class="btn" id="send">Enviar</button></div>
+<div class="top"><div class="avatar">BG</div><div><b>Letícia • Secretária da Dra. Bruna</b><br><span style="font-size:11px"><span class="online"></span> online agora • responde na hora</span></div></div>
+<div class="msgs" id="msgs"></div><div class="typing" id="typing">Letícia está digitando...</div>
+<div class="input-area"><input id="input" placeholder="Digite seu CPF..."><button class="send" id="send">➤</button></div>
 </div>
 
 <script>
-const KEY="bg_agenda_v2", INICIO=8, FIM=17, SERV=["Dentista","Harmonização","Avaliação"];
+const KEY="bg_agenda_v2", SERV=["Dentista","Harmonização","Avaliação"];
 let est={etapa:"cpf", cpf:"", nome:"", serv:"", data:"", hora:""};
-const get=()=>JSON.parse(localStorage.getItem(KEY)||"[]"); const save=a=>localStorage.setItem(KEY,JSON.stringify(a));
+const get=()=>JSON.parse(localStorage.getItem(KEY)||"[]"), save=a=>localStorage.setItem(KEY,JSON.stringify(a));
 const isWeekend=s=>{let d=new Date(s+"T12:00:00"); return d.getDay()==0||d.getDay()==6}
-const ocupados=data=>get().filter(a=>a.data==data&&a.status!="cancelado").map(a=>a.hora);
+const ocupados=d=>get().filter(a=>a.data==d&&a.status!="cancelado").map(a=>a.hora);
 const gerarDatas=()=>{let r=[],h=new Date(); for(let i=0;i<25;i++){let d=new Date(); d.setDate(h.getDate()+i); let iso=d.toISOString().slice(0,10); if(!isWeekend(iso)) r.push(iso)} return r}
-function bot(t){let d=document.createElement("div"); d.className="msg bot"; d.innerHTML=t; msgs.appendChild(d); msgs.scrollTop=9999}
-function user(t){let d=document.createElement("div"); d.className="msg user"; d.textContent=t; msgs.appendChild(d)}
-function start(){ bot(`Olá! Sou a secretária da Dra. Bruna ✨<br><br>Digite seu <b>CPF</b> para consultar ou agendar.<br><br><i>3 serviços:</i><br>🦷 Dentista<br>💉 Harmonização<br>🔍 Avaliação<br><br><small>Valores só após avaliação presencial.</small>`); }
+const msgsEl=document.getElementById("msgs"), typingEl=document.getElementById("typing");
+
+function bot(t, delay=700){
+ typingEl.style.display="block";
+ setTimeout(()=>{
+  typingEl.style.display="none";
+  let d=document.createElement("div"); d.className="msg bot"; d.innerHTML=t; msgsEl.appendChild(d); msgsEl.scrollTop=99999;
+ }, delay);
+}
+function user(t){ let d=document.createElement("div"); d.className="msg user"; d.textContent=t; msgsEl.appendChild(d); msgsEl.scrollTop=99999; }
+function quickBtns(arr, cb){ let wrap=document.createElement("div"); wrap.className="quick"; arr.forEach(a=>{ let b=document.createElement("button"); b.textContent=a.label; b.onclick=()=>cb(a.value); wrap.appendChild(b); }); let cont=document.createElement("div"); cont.className="msg bot"; cont.appendChild(wrap); msgsEl.appendChild(cont); }
+
+function start(){
+ bot(`Oii! Aqui é a Letícia, secretária da Dra. Bruna Giacomazzi 😊<br><br>Que bom ter você aqui! Eu cuido de todo seu agendamento por aqui, tá?<br><br>Me manda seu <b>CPF</b> (só os 11 números) pra eu te encontrar ou te cadastrar rapidinho.`);
+}
 function fluxo(txt){
  let t=txt.trim();
  if(est.etapa=="cpf"){
-  if(t.length<11){bot("CPF inválido, digite 11 números."); return}
+  if(t.length<11){ bot("Ops, esse CPF parece curtinho. Me manda os 11 números? Ex: 12345678900"); return; }
   est.cpf=t; let meus=get().filter(a=>a.cpf==t&&a.status!="cancelado"); let cad=get().find(a=>a.cpf==t);
-  if(meus.length>0){ bot(`Olá ${cad.nome}! Você já tem:<br>${meus.map(a=>`📅 <b>${a.data.split("-").reverse().join("/")} ${a.hora}</b> - ${a.servico} <button onclick="cancelCli('${a.data}','${a.hora}')">Cancelar</button>`).join("<br>")}<br><br>Digite <b>NOVO</b> para novo agendamento.`); est.etapa="logado"; return}
-  if(cad){ est.nome=cad.nome; bot(`Bem-vinda de volta, ${cad.nome}! Escolha:<br><b>1</b> Dentista<br><b>2</b> Harmonização<br><b>3</b> Avaliação`); est.etapa="serv"; }
-  else{ bot("CPF novo por aqui! Qual seu nome completo?"); est.etapa="nome"; }
- } else if(est.etapa=="nome"){ est.nome=t; bot(`Prazer, ${est.nome}! Escolha o serviço:<br><b>1</b> Dentista<br><b>2</b> Harmonização<br><b>3</b> Avaliação`); est.etapa="serv"; }
- else if(est.etapa=="logado"){ if(t.toUpperCase().includes("NOVO")){ bot("Qual serviço? <b>1</b> Dentista <b>2</b> Harmonização <b>3</b> Avaliação"); est.etapa="serv"; } }
- else if(est.etapa=="serv"){
-  let idx=parseInt(t)-1; if(t.toLowerCase().includes("dent")) idx=0; if(t.toLowerCase().includes("harm")) idx=1; if(t.toLowerCase().includes("aval")) idx=2;
-  est.serv=SERV[idx]||SERV[0]; let datas=gerarDatas(); bot(`Serviço: <b>${est.serv}</b><br>Escolha a data:<div class="horarios">${datas.map(d=>`<button onclick="pickData('${d}')">${d.split("-").reverse().join("/")}</button>`).join("")}</div>`); est.etapa="data";
+  if(meus.length>0){
+   bot(`Achei você, ${cad.nome}! 🎉<br><br>Você tem ${meus.length} horário(s) marcado(s) com a gente:<br><br>${meus.map(a=>`🗓️ <b>${a.data.split("-").reverse().join("/")} às ${a.hora}</b> - ${a.servico}`).join("<br>")}<br><br>O que você quer fazer agora?`, 500);
+   setTimeout(()=> quickBtns([{label:"📅 Agendar novo",value:"NOVO"},{label:"🔄 Reagendar / Cancelar",value:"CANCEL"}], v=>{ user(v); handleLogado(v); }), 800);
+   est.etapa="logado"; return;
+  }
+  if(cad){ est.nome=cad.nome; bot(`Oi de novo, ${cad.nome}! Que bom te ver por aqui de novo 💖<br><br>Qual procedimento você quer fazer dessa vez?`, 600); setTimeout(()=> quickBtns([{label:"🦷 Dentista",value:"1"},{label:"💉 Harmonização",value:"2"},{label:"🔍 Avaliação",value:"3"}], v=>{ user(SERV[v-1]); pickServ(v); }), 900); est.etapa="serv"; }
+  else { bot(`CPF novo por aqui, seja bem-vinda! ✨<br><br>Como posso te chamar? Me diz seu nome completo.`, 700); est.etapa="nome"; }
  }
+ else if(est.etapa=="nome"){ est.nome=t; bot(`Prazer, ${est.nome}! 💕<br><br>Me conta, qual desses você quer agendar?`, 500); setTimeout(()=> quickBtns([{label:"🦷 Dentista",value:"1"},{label:"💉 Harmonização",value:"2"},{label:"🔍 Avaliação",value:"3"}], v=>{ user(SERV[v-1]); pickServ(v); }), 700); est.etapa="serv"; }
 }
-function pickData(d){ user(d.split("-").reverse().join("/")); est.data=d; let ocu=ocupados(d); let h=`Horários livres 08:00 às 17:00 (30min):<div class="horarios">`; for(let hh=INICIO; hh<FIM; hh++){ for(let mm of [0,30]){ let hr=`${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}`; let oc=ocu.includes(hr); h+=`<button ${oc?"disabled":""} class="${oc?"":"livre"}" onclick="pickHora('${hr}')">${hr}${oc?" - ocupado":""}</button>`; } } h+=`</div>`; bot(h); est.etapa="hora"; }
-function pickHora(hr){ user(hr); let novo={cpf:est.cpf, nome:est.nome, servico:est.serv, data:est.data, hora:hr, status:"confirmado", criado:new Date().toISOString()}; let ag=get(); ag.push(novo); save(ag); bot(`✅ <b>Confirmado!</b><br>${est.nome}<br>${est.serv} - ${est.data.split("-").reverse().join("/")} às ${hr}<br><br>Valor definido só na avaliação presencial.<br><br>Para ver ou cancelar, digite seu CPF novamente a qualquer hora.`); est={etapa:"cpf", cpf:"", nome:"", serv:"", data:"", hora:""}; }
-function cancelCli(data,hora){ let ag=get(); let i=ag.findIndex(x=>x.cpf==est.cpf&&x.data==data&&x.hora==hora); if(i>=0){ ag[i].status="cancelado"; save(ag); bot(`Cancelado: ${data} ${hora}. Horário liberado para outro cliente. Digite NOVO para reagendar.`); } }
+
+function handleLogado(v){
+ if(v=="NOVO"){ bot("Perfeito! Qual serviço você quer agora?"); quickBtns([{label:"🦷 Dentista",value:"1"},{label:"💉 Harmonização",value:"2"},{label:"🔍 Avaliação",value:"3"}], vv=>{ user(SERV[vv-1]); pickServ(vv); }); est.etapa="serv"; }
+ else { let meus=get().filter(a=>a.cpf==est.cpf&&a.status!="cancelado"); bot(`Para cancelar ou trocar, clica no horário abaixo:<br><div style="margin-top:8px">${meus.map(a=>`<button onclick="cancelCli('${a.data}','${a.hora}')" style="width:100%;margin:4px 0;padding:8px;border-radius:8px;border:1px solid #6A1B2A;background:white">${a.data.split("-").reverse().join("/")} ${a.hora} - ${a.servico} - CANCELAR</button>`).join("")}</div>`); }
+}
+function pickServ(v){
+ let idx=parseInt(v)-1; est.serv=SERV[idx];
+ bot(`Você escolheu <b>${est.serv}</b> - excelente escolha! 😍<br><br><small style="color:#888">Lembrando: valores só após avaliação presencial com a Dra, aqui é só agendamento, tá?</small><br><br>Agora escolhe um dia pra gente te atender:`, 600);
+ setTimeout(()=>{
+  let datas=gerarDatas();
+  let html=`<div class="horarios">${datas.map(d=>`<button onclick="pickData('${d}')">${d.split("-").reverse().join("/")} <small>${new Date(d+"T12:00:00").toLocaleDateString('pt-BR',{weekday:'short'})}</small></button>`).join("")}</div>`;
+  bot(html, 400);
+ }, 800);
+ est.etapa="data";
+}
+function pickData(d){ user(d.split("-").reverse().join("/")); est.data=d; let ocu=ocupados(d); let html=`Amei! Dia <b>${d.split("-").reverse().join("/")}</b> 📅<br><br>Agora me diz um horário livre (atendemos de 08:00 às 17:00, de 30 em 30min):<div class="horarios">`; for(let hh=8;hh<17;hh++){ for(let mm of [0,30]){ let hr=`${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}`; let oc=ocu.includes(hr); html+=`<button ${oc?"disabled":""} class="${oc?"":"livre"}" onclick="pickHora('${hr}')">${hr}${oc?" • ocupado":""}</button>`; } } html+=`</div>`; bot(html, 600); }
+function pickHora(hr){
+ user(hr);
+ let novo={cpf:est.cpf,nome:est.nome,servico:est.serv,data:est.data,hora:hr,status:"confirmado",criado:new Date().toISOString()};
+ let ag=get(); ag.push(novo); save(ag);
+ bot(`<div class="card-ok">✅ <b>Tudo confirmado, ${est.nome}!</b><br><br>📍 ${est.serv}<br>🗓️ ${est.data.split("-").reverse().join("/")} às ${hr}<br>🆔 CPF: ${est.cpf}<br><br>Já deixei reservado pra você e esse horário sumiu pra todo mundo.<br><br><small>Te espero na clínica! Qualquer coisa é só mandar seu CPF aqui de novo que eu te ajudo a cancelar ou remarcar.</small></div>`, 800);
+ est={etapa:"cpf",cpf:"",nome:"",serv:"",data:"",hora:""};
+ setTimeout(()=> bot(`Quer já deixar anotado? Digita seu CPF aqui quando quiser consultar 😉`), 2000);
+}
+function cancelCli(data,hora){ let ag=get(); let i=ag.findIndex(x=>x.cpf==est.cpf&&x.data==data&&x.hora==hora); if(i>=0){ ag[i].status="cancelado"; save(ag); bot(`Pronto! Cancelei seu horário de ${data.split("-").reverse().join("/")} às ${hora}. O horário já voltou a ficar livre 💕<br><br>Quer agendar outro?`); quickBtns([{label:"📅 Agendar novo",value:"NOVO"}], v=>{ user(v); handleLogado(v); }); } }
+
 document.getElementById("send").onclick=()=>{ let v=document.getElementById("input").value; if(!v) return; user(v); fluxo(v); document.getElementById("input").value=""; };
 document.getElementById("input").addEventListener("keydown", e=>{ if(e.key=="Enter") document.getElementById("send").click(); });
 start();
