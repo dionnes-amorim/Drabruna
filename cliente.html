@@ -1,10 +1,54 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sua Consulta - Dra Bruna</title>
-<style>body{font-family:Montserrat,sans-serif;background:#FFF8F5;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px} .t{background:white;padding:36px;border-radius:24px;max-width:440px;width:100%;border-top:7px solid #6A1B2A;box-shadow:0 20px 60px rgba(0,0,0,.12)} h2{font-family:Cormorant Garamond,serif;color:#6A1B2A;font-size:32px}</style>
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agendamento - Dra Bruna Giacomazzi</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&family=Cormorant+Garamond:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--vinho:#6A1B2A;--creme:#FFF8F5} *{margin:0;padding:0;box-sizing:border-box} body{background:var(--creme);font-family:Montserrat;display:flex;justify-content:center;padding:20px}
+.chat{width:100%;max-width:420px;background:white;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.12);border-top:7px solid var(--vinho);display:flex;flex-direction:column;height:92vh}
+.header{background:var(--vinho);color:white;padding:16px;text-align:center}
+.header h2{font-family:Cormorant Garamond;font-size:24px}.header span{font-size:11px;opacity:.8}
+.msgs{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#FFF8F5}
+.msg{padding:10px 14px;border-radius:14px;max-width:85%;font-size:13px;line-height:1.5}.bot{background:white;border:1px solid #eee;align-self:flex-start}.user{background:var(--vinho);color:white;align-self:flex-end}
+.input-area{display:flex;gap:8px;padding:12px;background:white;border-top:1px solid #eee}.input-area input{flex:1;padding:12px;border-radius:12px;border:1px solid #ddd}.btn{background:var(--vinho);color:white;border:none;padding:12px 18px;border-radius:12px;cursor:pointer}
+.horarios{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}.horarios button{padding:8px;border-radius:8px;border:1px solid var(--vinho);background:white;cursor:pointer;font-size:12px}.horarios button:disabled{background:#ddd;border-color:#ddd}.horarios button.livre:hover{background:var(--vinho);color:white}
+</style>
 </head><body>
-<div class="t"><h2>Pré-agendado com sucesso!</h2><div id="info" style="margin:20px 0;line-height:1.8;text-align:left"></div><a id="zap" style="background:#6A1B2A;color:white;padding:14px 20px;border-radius:30px;display:block;text-align:center;text-decoration:none;font-weight:600">CONFIRMAR NO WHATSAPP</a><p style="font-size:11px;color:#999;margin-top:14px;text-align:center">Guarde este link. Ele é seu comprovante.</p></div>
+<div class="chat">
+<div class="header"><h2>Dra. Bruna Giacomazzi</h2><span>Secretária Virtual • Seg-Sex 08h às 17h • Intervalo 30min</span></div>
+<div class="msgs" id="msgs"></div>
+<div class="input-area"><input id="input" placeholder="Digite seu CPF (11 números)"><button class="btn" id="send">Enviar</button></div>
+</div>
+
 <script>
-const p=new URLSearchParams(location.search);
-document.getElementById('info').innerHTML=`<b>Nome:</b> ${p.get('nome')}<br><b>Procedimento:</b> ${p.get('proc')}<br><b>Data:</b> ${p.get('data')} às ${p.get('hora')}<br><b>ID Exclusivo:</b> ${p.get('id')}<br><b>Status:</b> <span style="color:green">Aguardando confirmação</span>`;
-const msg=`Olá Dra Bruna! Sou ${p.get('nome')}, agendei ${p.get('proc')} para ${p.get('data')} às ${p.get('hora')}. ID: ${p.get('id')}. Whats: ${p.get('whats')}`;
-document.getElementById('zap').href=`https://wa.me/5517997474065?text=${encodeURIComponent(msg)}`; // <-- TROCA O NUMERO AQUI
-</script></body></html>
+const KEY="bg_agenda_v2", INICIO=8, FIM=17, SERV=["Dentista","Harmonização","Avaliação"];
+let est={etapa:"cpf", cpf:"", nome:"", serv:"", data:"", hora:""};
+const get=()=>JSON.parse(localStorage.getItem(KEY)||"[]"); const save=a=>localStorage.setItem(KEY,JSON.stringify(a));
+const isWeekend=s=>{let d=new Date(s+"T12:00:00"); return d.getDay()==0||d.getDay()==6}
+const ocupados=data=>get().filter(a=>a.data==data&&a.status!="cancelado").map(a=>a.hora);
+const gerarDatas=()=>{let r=[],h=new Date(); for(let i=0;i<25;i++){let d=new Date(); d.setDate(h.getDate()+i); let iso=d.toISOString().slice(0,10); if(!isWeekend(iso)) r.push(iso)} return r}
+function bot(t){let d=document.createElement("div"); d.className="msg bot"; d.innerHTML=t; msgs.appendChild(d); msgs.scrollTop=9999}
+function user(t){let d=document.createElement("div"); d.className="msg user"; d.textContent=t; msgs.appendChild(d)}
+function start(){ bot(`Olá! Sou a secretária da Dra. Bruna ✨<br><br>Digite seu <b>CPF</b> para consultar ou agendar.<br><br><i>3 serviços:</i><br>🦷 Dentista<br>💉 Harmonização<br>🔍 Avaliação<br><br><small>Valores só após avaliação presencial.</small>`); }
+function fluxo(txt){
+ let t=txt.trim();
+ if(est.etapa=="cpf"){
+  if(t.length<11){bot("CPF inválido, digite 11 números."); return}
+  est.cpf=t; let meus=get().filter(a=>a.cpf==t&&a.status!="cancelado"); let cad=get().find(a=>a.cpf==t);
+  if(meus.length>0){ bot(`Olá ${cad.nome}! Você já tem:<br>${meus.map(a=>`📅 <b>${a.data.split("-").reverse().join("/")} ${a.hora}</b> - ${a.servico} <button onclick="cancelCli('${a.data}','${a.hora}')">Cancelar</button>`).join("<br>")}<br><br>Digite <b>NOVO</b> para novo agendamento.`); est.etapa="logado"; return}
+  if(cad){ est.nome=cad.nome; bot(`Bem-vinda de volta, ${cad.nome}! Escolha:<br><b>1</b> Dentista<br><b>2</b> Harmonização<br><b>3</b> Avaliação`); est.etapa="serv"; }
+  else{ bot("CPF novo por aqui! Qual seu nome completo?"); est.etapa="nome"; }
+ } else if(est.etapa=="nome"){ est.nome=t; bot(`Prazer, ${est.nome}! Escolha o serviço:<br><b>1</b> Dentista<br><b>2</b> Harmonização<br><b>3</b> Avaliação`); est.etapa="serv"; }
+ else if(est.etapa=="logado"){ if(t.toUpperCase().includes("NOVO")){ bot("Qual serviço? <b>1</b> Dentista <b>2</b> Harmonização <b>3</b> Avaliação"); est.etapa="serv"; } }
+ else if(est.etapa=="serv"){
+  let idx=parseInt(t)-1; if(t.toLowerCase().includes("dent")) idx=0; if(t.toLowerCase().includes("harm")) idx=1; if(t.toLowerCase().includes("aval")) idx=2;
+  est.serv=SERV[idx]||SERV[0]; let datas=gerarDatas(); bot(`Serviço: <b>${est.serv}</b><br>Escolha a data:<div class="horarios">${datas.map(d=>`<button onclick="pickData('${d}')">${d.split("-").reverse().join("/")}</button>`).join("")}</div>`); est.etapa="data";
+ }
+}
+function pickData(d){ user(d.split("-").reverse().join("/")); est.data=d; let ocu=ocupados(d); let h=`Horários livres 08:00 às 17:00 (30min):<div class="horarios">`; for(let hh=INICIO; hh<FIM; hh++){ for(let mm of [0,30]){ let hr=`${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}`; let oc=ocu.includes(hr); h+=`<button ${oc?"disabled":""} class="${oc?"":"livre"}" onclick="pickHora('${hr}')">${hr}${oc?" - ocupado":""}</button>`; } } h+=`</div>`; bot(h); est.etapa="hora"; }
+function pickHora(hr){ user(hr); let novo={cpf:est.cpf, nome:est.nome, servico:est.serv, data:est.data, hora:hr, status:"confirmado", criado:new Date().toISOString()}; let ag=get(); ag.push(novo); save(ag); bot(`✅ <b>Confirmado!</b><br>${est.nome}<br>${est.serv} - ${est.data.split("-").reverse().join("/")} às ${hr}<br><br>Valor definido só na avaliação presencial.<br><br>Para ver ou cancelar, digite seu CPF novamente a qualquer hora.`); est={etapa:"cpf", cpf:"", nome:"", serv:"", data:"", hora:""}; }
+function cancelCli(data,hora){ let ag=get(); let i=ag.findIndex(x=>x.cpf==est.cpf&&x.data==data&&x.hora==hora); if(i>=0){ ag[i].status="cancelado"; save(ag); bot(`Cancelado: ${data} ${hora}. Horário liberado para outro cliente. Digite NOVO para reagendar.`); } }
+document.getElementById("send").onclick=()=>{ let v=document.getElementById("input").value; if(!v) return; user(v); fluxo(v); document.getElementById("input").value=""; };
+document.getElementById("input").addEventListener("keydown", e=>{ if(e.key=="Enter") document.getElementById("send").click(); });
+start();
+</script>
+</body></html>
