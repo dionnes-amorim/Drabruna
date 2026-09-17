@@ -1,0 +1,8 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sua Consulta</title>
+<style>body{font-family:Montserrat;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#FFF8F5} .box{background:white;padding:34px;border-radius:24px;max-width:420px;width:90%;border-top:6px solid #6A1B2A;text-align:center}</style>
+</head><body><div class="box"><h2 style="font-family:Cormorant Garamond;color:#6A1B2A">Pré-agendado!</h2><div id="info" style="margin:20px 0;text-align:left"></div><a id="zap" style="background:#6A1B2A;color:white;padding:14px;border-radius:30px;display:block;text-decoration:none">Confirmar no WhatsApp da Dra</a></div>
+<script>
+const p=new URLSearchParams(location.search); 
+info.innerHTML=`<b>Nome:</b> ${p.get('nome')}<br><b>Proc:</b> ${p.get('proc')}<br><b>Data:</b> ${p.get('data')} ${p.get('hora')}<br><b>ID:</b> ${p.get('id')}`;
+zap.href=`https://wa.me/5549999999999?text=Olá Dra Bruna! Sou ${p.get('nome')} - ${p.get('proc')} dia ${p.get('data')} às ${p.get('hora')} ID ${p.get('id')}`;
+</script></body></html>
