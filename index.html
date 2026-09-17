@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dra. Bruna Giacomazzi | Harmonização Facial</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--vinho:#6A1B2A;--vinho2:#8C2A3D;--creme:#FFF8F5;--dourado:#C9A86A}
+*{margin:0;padding:0;box-sizing:border-box} body{background:var(--creme);font-family:'Montserrat',sans-serif;color:#1a1a1a}
+h1,h2{font-family:'Cormorant Garamond',serif}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:18px 6%;background:white;position:sticky;top:0;z-index:10}
+.logo{font-family:'Cormorant Garamond';font-size:30px;font-weight:700;color:var(--vinho)}
+.btn-vinho{background:var(--vinho);color:white;padding:13px 26px;border-radius:30px;text-decoration:none;border:none;cursor:pointer;font-weight:500}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;padding:60px 6%;align-items:center}
+.hero h1{font-size:72px;line-height:.9;color:var(--vinho)} .hero h1 i{font-weight:400;color:#111}
+.sub{letter-spacing:4px;font-size:11px;color:var(--vinho2);text-transform:uppercase}
+.img-card{height:500px;background:linear-gradient(20deg,#6A1B2A,#D4AF7A);border-radius:40px 40px 0 40px}
+.badge{margin-top:-30px;margin-left:-20px;background:white;padding:16px 22px;border-radius:16px;display:inline-block;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+.servicos{padding:70px 6%;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{background:white;padding:28px;border-radius:20px;border:1px solid #eee} .card.destaque{background:var(--vinho);color:white}
+.agendamento{padding:70px 6%;background:var(--vinho)} .agend-box{display:grid;grid-template-columns:1fr 1fr;gap:40px;background:rgba(255,255,255,.08);padding:40px;border-radius:28px;color:white}
+form{background:white;padding:26px;border-radius:20px;color:#111;display:flex;flex-direction:column;gap:10px}
+input,select{padding:12px;border-radius:10px;border:1px solid #ddd;width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#linkGerado{background:#fff8f5;border:1px dashed var(--vinho);padding:12px;border-radius:10px;color:#111;margin-top:15px;word-break:break-all}
+.hidden{display:none}
+@media(max-width:900px){.hero,.agend-box,.servicos{grid-template-columns:1fr}.hero h1{font-size:52px}}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="logo">BG • BRUNA</div><a href="#agendamento" class="btn-vinho">Agendar Avaliação</a></nav>
+
+<section class="hero">
+  <div><span class="sub">CRO | Harmonização Orofacial</span><h1>Dra. Bruna<br><i>Giacomazzi</i></h1>
+  <p style="margin:18px 0;color:#666;line-height:1.6">Beleza natural, sem exagero. Odontologia estética + harmonização facial com toque de luxo.</p>
+  <a href="#agendamento" class="btn-vinho">Quero agendar</a></div>
+  <div><div class="img-card"></div><div class="badge"><b>+1.200</b> sorrisos</div></div>
+</section>
+
+<section class="servicos">
+  <div class="card"><h3>Botox & Preenchimento</h3><p>Labial, olheiras, bigode chinês.</p></div>
+  <div class="card destaque"><h3>Lentes em Resina</h3><p>Sorriso perfeito em 1 dia.</p></div>
+  <div class="card"><h3>Bioestimulador</h3><p>Colágeno e pele de seda.</p></div>
+</section>
+
+<section id="agendamento" class="agendamento">
+  <div class="agend-box">
+    <div><h2 style="font-size:44px">Robô de Agendamento</h2><p style="margin-top:12px;opacity:.9">Cada cliente que preencher aqui gera um LINK EXCLUSIVO. Esse link é a página dele (cliente.html?id=) e vai direto pro WhatsApp e pro painel da Dra.</p><div id="linkGerado" class="hidden"></div></div>
+    <form id="form">
+      <input id="nome" placeholder="Nome completo" required>
+      <input id="whats" placeholder="WhatsApp (00) 00000-0000" required>
+      <select id="proc"><option>Botox</option><option>Preenchimento Labial</option><option>Lentes em Resina</option><option>Avaliação Completa</option></select>
+      <div class="grid2"><input type="date" id="data" required><input type="time" id="hora" required></div>
+      <button class="btn-vinho" type="submit">GERAR MEU LINK EXCLUSIVO</button>
+    </form>
+  </div>
+</section>
+
+<script>
+document.getElementById('form').addEventListener('submit', e=>{
+  e.preventDefault();
+  const dados = {nome: nome.value, whats: whats.value, proc: proc.value, data: data.value, hora: hora.value, id: Math.random().toString(36).substring(2,8).toUpperCase()};
+  const params = new URLSearchParams(dados).toString();
+  const link = `cliente.html?${params}`;
+  // Salva no painel da Dra
+  let lista = JSON.parse(localStorage.getItem('bg_agenda')||'[]'); lista.push(dados); localStorage.setItem('bg_agenda', JSON.stringify(lista));
+  const box = document.getElementById('linkGerado'); box.classList.remove('hidden');
+  box.innerHTML = `✅ Link exclusivo criado:<br><b>${location.origin}/${link}</b><br><br>Redirecionando...`;
+  setTimeout(()=>{ localStorage.setItem('cliente_atual', params); location.href = link; },1200);
+});
+</script>
+</body>
+</html>
