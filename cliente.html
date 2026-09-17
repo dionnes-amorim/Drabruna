@@ -1,8 +1,10 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sua Consulta</title>
-<style>body{font-family:Montserrat;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#FFF8F5} .box{background:white;padding:34px;border-radius:24px;max-width:420px;width:90%;border-top:6px solid #6A1B2A;text-align:center}</style>
-</head><body><div class="box"><h2 style="font-family:Cormorant Garamond;color:#6A1B2A">Pré-agendado!</h2><div id="info" style="margin:20px 0;text-align:left"></div><a id="zap" style="background:#6A1B2A;color:white;padding:14px;border-radius:30px;display:block;text-decoration:none">Confirmar no WhatsApp da Dra</a></div>
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sua Consulta - Dra Bruna</title>
+<style>body{font-family:Montserrat,sans-serif;background:#FFF8F5;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px} .t{background:white;padding:36px;border-radius:24px;max-width:440px;width:100%;border-top:7px solid #6A1B2A;box-shadow:0 20px 60px rgba(0,0,0,.12)} h2{font-family:Cormorant Garamond,serif;color:#6A1B2A;font-size:32px}</style>
+</head><body>
+<div class="t"><h2>Pré-agendado com sucesso!</h2><div id="info" style="margin:20px 0;line-height:1.8;text-align:left"></div><a id="zap" style="background:#6A1B2A;color:white;padding:14px 20px;border-radius:30px;display:block;text-align:center;text-decoration:none;font-weight:600">CONFIRMAR NO WHATSAPP</a><p style="font-size:11px;color:#999;margin-top:14px;text-align:center">Guarde este link. Ele é seu comprovante.</p></div>
 <script>
-const p=new URLSearchParams(location.search); 
-info.innerHTML=`<b>Nome:</b> ${p.get('nome')}<br><b>Proc:</b> ${p.get('proc')}<br><b>Data:</b> ${p.get('data')} ${p.get('hora')}<br><b>ID:</b> ${p.get('id')}`;
-zap.href=`https://wa.me/5549999999999?text=Olá Dra Bruna! Sou ${p.get('nome')} - ${p.get('proc')} dia ${p.get('data')} às ${p.get('hora')} ID ${p.get('id')}`;
+const p=new URLSearchParams(location.search);
+document.getElementById('info').innerHTML=`<b>Nome:</b> ${p.get('nome')}<br><b>Procedimento:</b> ${p.get('proc')}<br><b>Data:</b> ${p.get('data')} às ${p.get('hora')}<br><b>ID Exclusivo:</b> ${p.get('id')}<br><b>Status:</b> <span style="color:green">Aguardando confirmação</span>`;
+const msg=`Olá Dra Bruna! Sou ${p.get('nome')}, agendei ${p.get('proc')} para ${p.get('data')} às ${p.get('hora')}. ID: ${p.get('id')}. Whats: ${p.get('whats')}`;
+document.getElementById('zap').href=`https://wa.me/5517997474065?text=${encodeURIComponent(msg)}`; // <-- TROCA O NUMERO AQUI
 </script></body></html>
