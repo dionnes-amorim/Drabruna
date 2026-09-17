@@ -1,0 +1,13 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Painel Dra Bruna</title>
+<style>body{font-family:Montserrat;padding:30px 5%} table{width:100%;border-collapse:collapse;margin-top:20px} th,td{padding:12px;border-bottom:1px solid #eee;text-align:left} th{background:#6A1B2A;color:white} h1{font-family:Cormorant Garamond;color:#6A1B2A;font-size:36px}</style>
+</head><body>
+<h1>Painel - Dra Bruna Giacomazzi</h1><p>Todos os agendamentos do robô aparecem aqui.</p>
+<table id="tab"><thead><tr><th>Nome</th><th>Whats</th><th>Procedimento</th><th>Data</th><th>ID</th><th>Link</th></tr></thead><tbody></tbody></table>
+<script>
+const lista=JSON.parse(localStorage.getItem('bg_db')||'[]');
+const tbody=document.querySelector('#tab tbody');
+if(lista.length==0) tbody.innerHTML='<tr><td colspan=6>Nenhum agendamento ainda</td></tr>';
+lista.reverse().forEach(a=>{
+ tbody.innerHTML+=`<tr><td>${a.nome}</td><td>${a.whats}</td><td>${a.proc}</td><td>${a.data} ${a.hora}</td><td>${a.id}</td><td><a href="cliente.html?nome=${a.nome}&whats=${a.whats}&proc=${a.proc}&data=${a.data}&hora=${a.hora}&id=${a.id}" target="_blank">Abrir link do cliente</a></td></tr>`;
+});
+</script></body></html>
