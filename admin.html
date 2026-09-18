@@ -20,28 +20,20 @@ input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1.5px so
 .filters select{min-width:160px;width:auto}
 .table-wrap{background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.05);overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
-th,td{padding:12px;text-align:left;border-bottom:1px solid #eee;white-space:nowrap}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}
 th{background:var(--azul);color:white;font-size:11px;letter-spacing:.6px;text-transform:uppercase;position:sticky;top:0}
 td{white-space:normal;vertical-align:top}
 .btn-resp{padding:8px 14px;border-radius:20px;border:none;background:var(--azul);color:white;font-weight:700;cursor:pointer;font-size:12px}
 .cards{display:none;grid-template-columns:1fr;gap:12px}
 .card-relato{background:white;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.05);border-left:5px solid var(--azul)}
-.card-relato.linha{display:flex;justify-content:space-between;margin:4px 0;font-size:12px}
-.card-relato.desc{font-size:13px;color:#333;background:#f9fafb;padding:10px;border-radius:10px;margin:8px 0;line-height:1.5}
 .badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block}
-.Novo{background:#FFF4CC}.Em.Análise{background:#D6E8FF}.Respondido{background:#D1FAE5}.Concluído{background:#c8f7c5}
+.Novo{background:#FFF4CC}.Em{background:#D6E8FF}.Respondido{background:#D1FAE5}.Concluído{background:#c8f7c5}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);justify-content:center;align-items:center;z-index:99;padding:16px}
 .modal-box{background:white;padding:22px;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow:auto}
 @media(max-width:900px){
  .kpis{grid-template-columns:1fr 1fr}
  .table-wrap{display:none}
  .cards{display:grid}
-  header{padding:12px 4%}
-  header b{font-size:12px}
-}
-@media(max-width:480px){
- .kpis{grid-template-columns:1fr 1fr}
- .kpi{font-size:22px}
 }
 </style>
 </head><body>
@@ -53,7 +45,7 @@ td{white-space:normal;vertical-align:top}
 
 <div class="container">
 <div class="kpis">
-<div class="card"><div style="font-size:10px;color:#666;letter-spacing:.8px">TOTAL</div><div class="kpi" id="kpiTotal">0</div></div>
+<div class="card"><div style="font-size:10px;color:#666">TOTAL</div><div class="kpi" id="kpiTotal">0</div></div>
 <div class="card"><div style="font-size:10px;color:#666">ANÔNIMOS</div><div class="kpi" id="kpiAnon">0</div></div>
 <div class="card"><div style="font-size:10px;color:#666">NOVOS</div><div class="kpi" id="kpiNovos">0</div></div>
 <div class="card"><div style="font-size:10px;color:#666">CONCLUÍDOS</div><div class="kpi" id="kpiResp">0</div></div>
@@ -73,8 +65,8 @@ td{white-space:normal;vertical-align:top}
 <div class="modal" id="modal"><div class="modal-box">
 <h3 style="color:var(--azul)">Responder / Ação tomada</h3>
 <div style="background:#f9fafb;padding:12px;border-radius:10px;font-size:13px;margin:10px 0" id="modalInfo"></div>
-<label style="font-size:11px;font-weight:800">O que foi feito?</label><textarea id="acao" rows="4" placeholder="Ex: Entrevista com setor, verificação..."></textarea>
-<label style="font-size:11px;font-weight:800;margin-top:8px;display:block">Parecer interno</label><textarea id="parecer" rows="3" placeholder="Ex: Procede / Não procede"></textarea>
+<label style="font-size:11px;font-weight:800">O que foi feito?</label><textarea id="acao" rows="4"></textarea>
+<label style="font-size:11px;font-weight:800;margin-top:8px;display:block">Parecer interno</label><textarea id="parecer" rows="3"></textarea>
 <label style="font-size:11px;font-weight:800">Status final</label><select id="statusFinal"><option>Novo</option><option>Em Análise</option><option>Respondido</option><option>Concluído</option><option>Arquivado</option></select>
 <button class="btn" style="margin-top:10px" onclick="salvarResposta()">Salvar resposta</button>
 <button onclick="fechar()" style="margin-top:8px;width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;background:white;cursor:pointer">Cancelar</button>
@@ -94,11 +86,10 @@ async function logar(){
     token=j.token; localStorage.setItem('delipack_token',token);
     mostrar();
   }catch(e){
-    erro.textContent='Servidor acordando... aguarde 20s e tente de novo (erro Render 502)';
+    erro.textContent='Servidor acordando... aguarde 20s e tente de novo';
     btn.textContent='Entrar no painel'; btn.disabled=false;
   }
 }
-
 function mostrar(){ document.getElementById('login').style.display='none'; document.getElementById('app').style.display='block'; carregar(); }
 
 async function carregar(){
@@ -107,7 +98,7 @@ async function carregar(){
     if(!r.ok){ sair(); return; }
     lista=await r.json();
     render();
-  }catch(e){ console.log(e); }
+  }catch(e){}
 }
 
 function render(){
@@ -124,19 +115,20 @@ function render(){
  const tbody=document.getElementById('tbody'); const cards=document.getElementById('cards');
  tbody.innerHTML=''; cards.innerHTML='';
  l.forEach(r=>{
-  tbody.innerHTML+=`<tr><td style="white-space:nowrap">${r.data_br||new Date(r.created_at).toLocaleDateString('pt-BR')}</td><td><b>${r.tipo}</b></td><td>${r.anonimo?'🕵️ Anônimo':'🙋 '+(r.nome||'')}</td><td>${r.setor||''}</td><td>${r.gravidade||'-'}</td><td>${r.local||'-'}</td><td style="max-width:200px"><div style="white-space:normal;overflow:hidden;text-overflow:ellipsis">${(r.descricao||'').slice(0,90)}... ${r.resposta_admin||r.acao_tomada?'<br><span style="color:green;font-size:11px">✅ Respondido</span>':''}</div></td><td><button class="btn-resp" onclick="abrir('${r.id}')">Responder</button></td></tr>`;
-  cards.innerHTML+=`
-  <div class="card-relato">
-    <div class="linha"><span><b>${r.tipo}</b> • ${r.data_br||''}</span><span class="badge ${r.status}">${r.status||'Novo'}</span></div>
-    <div class="linha"><span>👤 ${r.anonimo?'🕵️ Anônimo':r.nome||''}</span><span>📍 ${r.local||'-'}</span></div>
-    <div class="linha"><span>⚠️ ${r.gravidade||'-'}</span><span>${r.setor||''}</span></div>
-    <div class="desc">${r.descricao||''}<br>${r.resposta_admin?`<small style="color:green"><b>Ação:</b> ${r.acao_tomada||''}<br><b>Parecer:</b> ${r.resposta_admin}</small>`:''}</div>
-    <button class="btn-resp" style="width:100%" onclick="abrir('${r.id}')">Responder</button>
-  </div>`;
+  let descCurta = (r.descricao||'').substring(0,90);
+  let respondido = r.resposta_admin ? '<br><span style="color:green;font-size:11px">✅ Respondido</span>' : '';
+  tbody.innerHTML += '<tr><td>'+(r.data_br||'')+'</td><td><b>'+r.tipo+'</b></td><td>'+(r.anonimo?'🕵️ Anônimo':'🙋 '+r.nome)+'</td><td>'+(r.setor||'')+'</td><td>'+(r.gravidade||'-')+'</td><td>'+(r.local||'-')+'</td><td style="max-width:200px">'+descCurta+'... '+respondido+'</td><td><button class="btn-resp" onclick="abrir(\''+r.id+'\')">Responder</button></td></tr>';
+
+  let badge = r.status || 'Novo';
+  let acaoTxt = '';
+  if(r.resposta_admin){
+    acaoTxt = '<small style="color:green"><b>Acao:</b> '+(r.acao_tomada||'')+'<br><b>Parecer:</b> '+r.resposta_admin+'</small>';
+  }
+  cards.innerHTML += '<div class="card-relato"><div style="display:flex;justify-content:space-between;font-size:12px"><span><b>'+r.tipo+'</b> • '+(r.data_br||'')+'</span><span class="badge '+badge+'">'+badge+'</span></div><div style="display:flex;justify-content:space-between;margin:6px 0;font-size:12px"><span>👤 '+(r.anonimo?'Anônimo':r.nome)+'</span><span>📍 '+(r.local||'-')+'</span></div><div style="font-size:12px">⚠️ '+(r.gravidade||'-')+' • '+(r.setor||'')+'</div><div style="background:#f9fafb;padding:10px;border-radius:10px;font-size:13px;margin:8px 0">'+(r.descricao||'')+'<br>'+acaoTxt+'</div><button class="btn-resp" style="width:100%" onclick="abrir(\''+r.id+'\')">Responder</button></div>';
  });
 }
 
-function abrir(id){ idAtivo=id; let r=lista.find(x=>x.id==id); document.getElementById('modalInfo').innerHTML=`<b>${r.tipo} - ${r.data_br||''}</b><br>${r.nome||''} - ${r.setor||''}<br><br>${r.descricao||''}`; document.getElementById('acao').value=r.acao_tomada||''; document.getElementById('parecer').value=r.resposta_admin||''; document.getElementById('statusFinal').value=r.status||'Novo'; document.getElementById('modal').style.display='flex'; }
+function abrir(id){ idAtivo=id; let r=lista.find(x=>x.id==id); document.getElementById('modalInfo').innerHTML='<b>'+r.tipo+' - '+(r.data_br||'')+'</b><br>'+(r.nome||'')+' - '+(r.setor||'')+'<br><br>'+(r.descricao||''); document.getElementById('acao').value=r.acao_tomada||''; document.getElementById('parecer').value=r.resposta_admin||''; document.getElementById('statusFinal').value=r.status||'Novo'; document.getElementById('modal').style.display='flex'; }
 function fechar(){ document.getElementById('modal').style.display='none'; }
 
 async function salvarResposta(){
@@ -147,17 +139,10 @@ async function salvarResposta(){
 
 function exportar(){
  let csv='Data,Tipo,Nome,Setor,Gravidade,Local,Descricao,Status,Acao,Parecer\n';
- lista.forEach(r=>{ csv+=`"${r.data_br||''}","${r.tipo}","${r.nome}","${r.setor}","${r.gravidade}","${r.local}","${(r.descricao||'').replace(/"/g,'""')}","${r.status}","${(r.acao_tomada||'').replace(/"/g,'""')}","${(r.resposta_admin||'').replace(/"/g,'""')}"\n`; });
+ lista.forEach(r=>{ csv+='"'+(r.data_br||'')+'","'+r.tipo+'","'+r.nome+'","'+r.setor+'","'+r.gravidade+'","'+r.local+'","'+(r.descricao||'').replace(/"/g,'""')+'","'+r.status+'","'+(r.acao_tomada||'').replace(/"/g,'""')+'","'+(r.resposta_admin||'').replace(/"/g,'""')+'"\n'; });
  let blob=new Blob([csv],{type:'text/csv'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ouvidoria-delipack.csv'; a.click();
 }
-
 function sair(){ localStorage.removeItem('delipack_token'); location.reload(); }
 if(token){ mostrar(); }
 </script>
 </body></html>
-  cards.innerHTML+=`
-  <div class="card-relato">
-    <div class="linha"><span><b>${r.tipo}</b> • ${r.dataBR}</span><span class="badge ${r.status}">${r.status}</span></div>
-    <div class="linha"><span>👤 ${r.anonimo?'🕵️ Anônimo':r.nome}</span><span>📍 ${r.local||'-'}</span></div>
-    <div class="linha"><span>⚠️ ${r.gravidade}</span><span>${r.setor}</span></div>
-    <div class="desc">${r.descricao}<br>${r.respostaAdmin?`<small style="color:green"><b>Ação:</b> ${r.acao
