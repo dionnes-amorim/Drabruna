@@ -18,46 +18,38 @@ input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1.5px so
 <div class="modal" id="modal"><div class="modal-box"><h3 style="color:var(--azul)">Responder / Ação</h3><div id="mInfo" style="background:#f9fafb;padding:10px;border-radius:10px;font-size:13px;margin:10px 0"></div><label style="font-size:11px;font-weight:800">Ação tomada</label><textarea id="acao" rows="3"></textarea><label style="font-size:11px;font-weight:800">Parecer</label><textarea id="parecer" rows="2"></textarea><label style="font-size:11px;font-weight:800">Status</label><select id="st"><option>Novo</option><option>Em Análise</option><option>Respondido</option><option>Concluído</option><option>Arquivado</option></select><button class="btn" style="margin-top:10px" onclick="salvar()">Salvar</button><button onclick="modal.style.display='none'" style="margin-top:8px;width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;background:white">Cancelar</button></div></div>
 <script>
 let lista=[], idAt=null, token=localStorage.getItem('delipack_token');
-
 async function logar(){
-  const erroEl = document.getElementById('erro');
-  erroEl.textContent='Entrando...';
-  try{
-    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email.value.trim(),password:pass.value})});
-    const j=await r.json();
-    if(!r.ok){ erroEl.textContent=j.error||'Erro no login'; return; }
-    token=j.token; localStorage.setItem('delipack_token',token); mostrar();
-  }catch(e){
-    erroEl.textContent='Servidor offline. Verifique o Render.';
-  }
+ const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email.value,password:pass.value})});
+ const j=await r.json(); if(!r.ok){ erro.textContent=j.error; return; }
+ token=j.token; localStorage.setItem('delipack_token',token); mostrar();
 }
-
 function mostrar(){ login.style.display='none'; app.style.display='block'; carregar(); }
-
 async function carregar(){
  const r=await fetch('/api/relatos',{headers:{Authorization:'Bearer '+token}});
  if(!r.ok){ localStorage.removeItem('delipack_token'); location.reload(); return; }
  lista=await r.json(); render();
 }
-
 function render(){
  let l=[...lista]; let q=busca.value.toLowerCase(), ft=fTipo.value;
  if(q) l=l.filter(x=>JSON.stringify(x).toLowerCase().includes(q)); if(ft) l=l.filter(x=>x.tipo==ft);
  kT.textContent=lista.length; kA.textContent=lista.filter(x=>x.anonimo).length; kN.textContent=lista.filter(x=>x.status=='Novo').length; kC.textContent=lista.filter(x=>['Respondido','Concluído'].includes(x.status)).length;
  tbody.innerHTML=''; cards.innerHTML='';
  l.forEach(r=>{
-  tbody.innerHTML+=`<tr><td>${r.data_br||new Date(r.created_at).toLocaleDateString('pt-BR')}</td><td><b>${r.tipo}</b></td><td>${r.anonimo?'🕵️ Anônimo':r.nome}<br><small>${r.setor||''}</small></td><td>${r.gravidade||'-'}</td><td>${r.local||'-'}</td><td style="max-width:200px">${(r.descricao||'').slice(0,80)}... ${r.resposta_admin?'<br><span style="color:green">✅ Respondido</span>':''}</td><td><button class="btn-r" onclick="abrir('${r.id}')">Responder</button></td></tr>`;
-  cards.innerHTML+=`<div class="card-relato"><div style="display:flex;justify-content:space-between;font-size:12px"><b>${r.tipo}</b><span>${r.status}</span></div><div style="font-size:12px;margin:6px 0">👤 ${r.anonimo?'Anônimo':r.nome} • ⚠️ ${r.gravidade||'-'}</div><div style="background:#f9fafb;padding:8px;border-radius:8px;font-size:13px;margin:6px 0">${(r.descricao||'').slice(0,120)}...</div><button class="btn-r" style="width:100%" onclick="abrir('${r.id}')">Responder</button></div>`;
+  tbody.innerHTML+=`<tr><td>${r.data_br}</td><td><b>${r.tipo}</b></td><td>${r.anonimo?'🕵️ Anônimo':r.nome}<br><small>${r.setor}</small></td><td>${r.gravidade}</td><td>${r.local||'-'}</td><td style="max-width:200px">${r.descricao.slice(0,80)}... ${r.resposta_admin?'<br><span style="color:green">✅ Respondido</span>':''}</td><td><button class="btn-r" onclick="abrir('${r.id}')">Responder</button></td></tr>`;
+  cards.innerHTML+=`<div class="card-relato"><div style="display:flex;justify-content:space-between;font-size:12px"><b>${r.tipo}</b><span>${r.status}</span></div><div style="font-size:12px;margin:6px 0">👤 ${r.anonimo?'Anônimo':r.nome} • ⚠️ ${r.gravidade}</div><div style="background:#f9fafb;padding:8px;border-radius:8px;font-size:13px;margin:6px 0">${r.descricao.slice(0,120)}...</div><button class="btn-r" style="width:100%" onclick="abrir('${r.id}')">Responder</button></div>`;
  });
 }
-
-function abrir(id){ idAt=id; let r=lista.find(x=>x.id==id); mInfo.innerHTML=`<b>${r.tipo} - ${r.data_br||''}</b><br>${r.nome} - ${r.setor||''}<br><br>${r.descricao}`; acao.value=r.acao_tomada||''; parecer.value=r.resposta_admin||''; st.value=r.status||'Novo'; modal.style.display='flex'; }
-
+function abrir(id){ idAt=id; let r=lista.find(x=>x.id==id); mInfo.innerHTML=`<b>${r.tipo} - ${r.data_br}</b><br>${r.nome} - ${r.setor}<br><br>${r.descricao}`; acao.value=r.acao_tomada||''; parecer.value=r.resposta_admin||''; st.value=r.status; modal.style.display='flex'; }
 async function salvar(){
  const r=await fetch('/api/relatos/'+idAt,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({acao_tomada:acao.value,resposta_admin:parecer.value,status:st.value,data_resposta:new Date().toLocaleString('pt-BR')})});
  if(!r.ok){ alert('Erro ao salvar'); return; } modal.style.display='none'; carregar();
 }
-
 function sair(){ localStorage.removeItem('delipack_token'); location.reload(); }
 if(token) mostrar();
 </script></body></html>
+  cards.innerHTML+=`
+  <div class="card-relato">
+    <div class="linha"><span><b>${r.tipo}</b> • ${r.dataBR}</span><span class="badge ${r.status}">${r.status}</span></div>
+    <div class="linha"><span>👤 ${r.anonimo?'🕵️ Anônimo':r.nome}</span><span>📍 ${r.local||'-'}</span></div>
+    <div class="linha"><span>⚠️ ${r.gravidade}</span><span>${r.setor}</span></div>
+    <div class="desc">${r.descricao}<br>${r.respostaAdmin?`<small style="color:green"><b>Ação:</b> ${r.acao
