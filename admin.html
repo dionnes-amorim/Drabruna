@@ -1,52 +1,113 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin Delipack</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<style>:root{--azul:#0B2A4A}*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter;background:#F2F5F8}
-header{background:linear-gradient(135deg,var(--azul),#123c6a);color:white;padding:14px 4%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Admin Ouvidoria - Delipack</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--azul:#0B2A4A;--verde:#00C896} *{margin:0;padding:0;box-sizing:border-box} body{font-family:Inter;background:#F2F5F8}
+header{background:linear-gradient(135deg,var(--azul),#123c6a);color:white;padding:14px 4%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;width:100%;flex-wrap:wrap;gap:10px}
+header b{font-size:14px;letter-spacing:.5px}
 #login{height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0B2A4A,#123c6a);padding:20px}
-.box{background:white;padding:28px;border-radius:18px;width:100%;max-width:380px}
-input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1.5px solid #ddd;margin:6px 0}
-.btn{background:var(--azul);color:white;padding:12px;border:none;border-radius:10px;width:100%;font-weight:700;cursor:pointer}
-.container{padding:16px 3%}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.card{background:white;border-radius:16px;padding:14px;box-shadow:0 6px 18px rgba(0,0,0,.05)}.kpi{font-size:24px;font-weight:800;color:var(--azul)}
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.filters input{flex:1;min-width:200px}.table-wrap{background:white;border-radius:16px;overflow:auto;box-shadow:0 6px 18px rgba(0,0,0,.05)}table{width:100%;border-collapse:collapse;font-size:13px;min-width:800px}th,td{padding:12px;border-bottom:1px solid #eee;text-align:left}th{background:var(--azul);color:white;font-size:11px;text-transform:uppercase}
-.cards{display:none;gap:12px}.card-relato{background:white;border-radius:16px;padding:14px;border-left:5px solid var(--azul);box-shadow:0 4px 12px rgba(0,0,0,.05)}
-.btn-r{padding:8px 14px;border-radius:20px;border:none;background:var(--azul);color:white;font-weight:700;cursor:pointer;font-size:12px}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);justify-content:center;align-items:center;z-index:99;padding:16px}.modal-box{background:white;padding:20px;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow:auto}
-@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.table-wrap{display:none}.cards{display:grid}}
-</style></head><body>
-<div id="login"><div class="box"><h2 style="color:var(--azul)">Admin Delipack</h2><p style="font-size:12px;color:#666;margin:6px 0 12px">Login seguro via servidor</p><input id="email" placeholder="admin@delipack.com.br" value="admin@delipack.com.br"><input id="pass" type="password" placeholder="Senha"><button class="btn" onclick="logar()">Entrar</button><p id="erro" style="color:red;font-size:12px;margin-top:6px"></p></div></div>
-<div id="app" style="display:none"><header><b>DELIPACK • OUVIDORIA</b><div style="display:flex;gap:8px"><button onclick="sair()" style="padding:8px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.2);color:white;cursor:pointer">Sair</button></div></header><div class="container"><div class="kpis"><div class="card"><div style="font-size:10px">TOTAL</div><div class="kpi" id="kT">0</div></div><div class="card"><div style="font-size:10px">ANÔNIMOS</div><div class="kpi" id="kA">0</div></div><div class="card"><div style="font-size:10px">NOVOS</div><div class="kpi" id="kN">0</div></div><div class="card"><div style="font-size:10px">CONCLUÍDOS</div><div class="kpi" id="kC">0</div></div></div><div class="filters"><input id="busca" placeholder="🔍 Buscar..." oninput="render()"><select id="fTipo" onchange="render()"><option value="">Todos tipos</option><option>Denúncia</option><option>Reclamação</option><option>Assédio Moral / Sexual</option><option>Sugestão</option><option>Elogio</option><option>Dúvida</option></select></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Quem</th><th>Gravidade</th><th>Local</th><th>Relato</th><th>Ação</th></tr></thead><tbody id="tbody"></tbody></table></div><div class="cards" id="cards"></div></div></div>
-<div class="modal" id="modal"><div class="modal-box"><h3 style="color:var(--azul)">Responder / Ação</h3><div id="mInfo" style="background:#f9fafb;padding:10px;border-radius:10px;font-size:13px;margin:10px 0"></div><label style="font-size:11px;font-weight:800">Ação tomada</label><textarea id="acao" rows="3"></textarea><label style="font-size:11px;font-weight:800">Parecer</label><textarea id="parecer" rows="2"></textarea><label style="font-size:11px;font-weight:800">Status</label><select id="st"><option>Novo</option><option>Em Análise</option><option>Respondido</option><option>Concluído</option><option>Arquivado</option></select><button class="btn" style="margin-top:10px" onclick="salvar()">Salvar</button><button onclick="modal.style.display='none'" style="margin-top:8px;width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;background:white">Cancelar</button></div></div>
+.box{background:white;padding:28px;border-radius:18px;width:100%;max-width:360px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1.5px solid #ddd;margin:6px 0;outline:none;font-size:14px}
+.btn{background:var(--azul);color:white;padding:13px;border:none;border-radius:10px;width:100%;font-weight:700;cursor:pointer}
+.container{padding:16px 3%}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.card{background:white;border-radius:16px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.05)}
+.kpi{font-size:26px;font-weight:800;color:var(--azul)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.filters input{flex:1;min-width:200px}
+.filters select{min-width:160px;width:auto}
+
+/* TABELA DESKTOP */
+.table-wrap{background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.05);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #eee;white-space:nowrap} 
+th{background:var(--azul);color:white;font-size:11px;letter-spacing:.6px;text-transform:uppercase;position:sticky;top:0}
+td{white-space:normal;vertical-align:top}
+.btn-resp{padding:8px 14px;border-radius:20px;border:none;background:var(--azul);color:white;font-weight:700;cursor:pointer;font-size:12px}
+
+/* CARDS MOBILE - ESCONDE TABELA E MOSTRA CARD */
+.cards{display:none;grid-template-columns:1fr;gap:12px}
+.card-relato{background:white;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.05);border-left:5px solid var(--azul)}
+.card-relato .linha{display:flex;justify-content:space-between;margin:4px 0;font-size:12px}
+.card-relato .desc{font-size:13px;color:#333;background:#f9fafb;padding:10px;border-radius:10px;margin:8px 0;line-height:1.5}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block}
+.Novo{background:#FFF4CC}.Em.Análise{background:#D6E8FF}.Respondido{background:#D1FAE5}.Concluído{background:#c8f7c5}
+
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);justify-content:center;align-items:center;z-index:99;padding:16px}
+.modal-box{background:white;padding:22px;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow:auto}
+
+/* RESPONSIVO */
+@media(max-width:900px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .table-wrap{display:none}
+  .cards{display:grid}
+  header{padding:12px 4%}
+  header b{font-size:12px}
+}
+@media(max-width:480px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .kpi{font-size:22px}
+}
+</style>
+</head><body>
+
+<div id="login"><div class="box"><h2 style="color:var(--azul)">Ouvidoria Delipack</h2><p style="font-size:12px;color:#666;margin:6px 0 14px">Acesso restrito ao comitê</p><input id="u" placeholder="admin"><input id="p" type="password" placeholder="delipack2026"><button class="btn" onclick="logar()">Entrar no painel</button><p id="erro" style="color:red;font-size:12px;margin-top:8px"></p></div></div>
+
+<div id="app">
+<header><b>DELIPACK • OUVIDORIA</b><div style="display:flex;gap:8px"><button onclick="exportar()" style="padding:9px 14px;border-radius:10px;border:none;background:white;color:var(--azul);font-weight:800;cursor:pointer;font-size:12px">Exportar</button><button onclick="sair()" style="padding:9px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.2);color:white;cursor:pointer;font-size:12px">Sair</button></div></header>
+
+<div class="container">
+<div class="kpis">
+<div class="card"><div style="font-size:10px;color:#666;letter-spacing:.8px">TOTAL</div><div class="kpi" id="kpiTotal">0</div></div>
+<div class="card"><div style="font-size:10px;color:#666">ANÔNIMOS</div><div class="kpi" id="kpiAnon">0</div></div>
+<div class="card"><div style="font-size:10px;color:#666">NOVOS</div><div class="kpi" id="kpiNovos">0</div></div>
+<div class="card"><div style="font-size:10px;color:#666">CONCLUÍDOS</div><div class="kpi" id="kpiResp">0</div></div>
+</div>
+
+<div class="filters">
+<input id="busca" placeholder="🔍 Buscar por tipo, nome, descrição..." oninput="render()">
+<select id="fTipo" onchange="render()"><option value="">Todos os tipos</option><option>Denúncia</option><option>Reclamação</option><option>Assédio Moral / Sexual</option><option>Sugestão</option><option>Elogio</option><option>Dúvida</option></select>
+</div>
+
+<div class="table-wrap"><table><thead><tr><th>Data/Hora</th><th>Tipo</th><th>Anônimo?</th><th>Identificação</th><th>Gravidade</th><th>Local</th><th>Relato</th><th>Ação</th></tr></thead><tbody id="tbody"></tbody></table></div>
+
+<div class="cards" id="cards"></div>
+</div>
+</div>
+
+<div class="modal" id="modal"><div class="modal-box">
+<h3 style="color:var(--azul)">Responder / Ação tomada</h3>
+<div style="background:#f9fafb;padding:12px;border-radius:10px;font-size:13px;margin:10px 0" id="modalInfo"></div>
+<label style="font-size:11px;font-weight:800">O que foi feito?</label><textarea id="acao" rows="4" placeholder="Ex: Entrevista com setor, verificação..."></textarea>
+<label style="font-size:11px;font-weight:800;margin-top:8px;display:block">Parecer interno</label><textarea id="parecer" rows="3" placeholder="Ex: Procede / Não procede"></textarea>
+<label style="font-size:11px;font-weight:800">Status final</label><select id="statusFinal"><option>Novo</option><option>Em Análise</option><option>Respondido</option><option>Concluído</option><option>Arquivado</option></select>
+<button class="btn" style="margin-top:10px" onclick="salvarResposta()">Salvar resposta</button>
+<button onclick="fechar()" style="margin-top:8px;width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;background:white;cursor:pointer">Cancelar</button>
+</div></div>
+
 <script>
-let lista=[], idAt=null, token=localStorage.getItem('delipack_token');
-async function logar(){
- const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email.value,password:pass.value})});
- const j=await r.json(); if(!r.ok){ erro.textContent=j.error; return; }
- token=j.token; localStorage.setItem('delipack_token',token); mostrar();
-}
-function mostrar(){ login.style.display='none'; app.style.display='block'; carregar(); }
-async function carregar(){
- const r=await fetch('/api/relatos',{headers:{Authorization:'Bearer '+token}});
- if(!r.ok){ localStorage.removeItem('delipack_token'); location.reload(); return; }
- lista=await r.json(); render();
-}
+const KEY='delipack_ouv'; const get=()=>JSON.parse(localStorage.getItem(KEY)||'[]'), save=a=>localStorage.setItem(KEY,JSON.stringify(a));
+let idAtivo=null;
+function logar(){ if(u.value.toLowerCase()=='admin' && p.value=='delipack2026'){ localStorage.setItem('delipack_login','ok'); mostrar(); } else erro.textContent='Login inválido'; }
+function mostrar(){ login.style.display='none'; app.style.display='block'; render(); }
+function sair(){ localStorage.removeItem('delipack_login'); location.reload(); }
 function render(){
- let l=[...lista]; let q=busca.value.toLowerCase(), ft=fTipo.value;
- if(q) l=l.filter(x=>JSON.stringify(x).toLowerCase().includes(q)); if(ft) l=l.filter(x=>x.tipo==ft);
- kT.textContent=lista.length; kA.textContent=lista.filter(x=>x.anonimo).length; kN.textContent=lista.filter(x=>x.status=='Novo').length; kC.textContent=lista.filter(x=>['Respondido','Concluído'].includes(x.status)).length;
- tbody.innerHTML=''; cards.innerHTML='';
- l.forEach(r=>{
-  tbody.innerHTML+=`<tr><td>${r.data_br}</td><td><b>${r.tipo}</b></td><td>${r.anonimo?'🕵️ Anônimo':r.nome}<br><small>${r.setor}</small></td><td>${r.gravidade}</td><td>${r.local||'-'}</td><td style="max-width:200px">${r.descricao.slice(0,80)}... ${r.resposta_admin?'<br><span style="color:green">✅ Respondido</span>':''}</td><td><button class="btn-r" onclick="abrir('${r.id}')">Responder</button></td></tr>`;
-  cards.innerHTML+=`<div class="card-relato"><div style="display:flex;justify-content:space-between;font-size:12px"><b>${r.tipo}</b><span>${r.status}</span></div><div style="font-size:12px;margin:6px 0">👤 ${r.anonimo?'Anônimo':r.nome} • ⚠️ ${r.gravidade}</div><div style="background:#f9fafb;padding:8px;border-radius:8px;font-size:13px;margin:6px 0">${r.descricao.slice(0,120)}...</div><button class="btn-r" style="width:100%" onclick="abrir('${r.id}')">Responder</button></div>`;
- });
-}
-function abrir(id){ idAt=id; let r=lista.find(x=>x.id==id); mInfo.innerHTML=`<b>${r.tipo} - ${r.data_br}</b><br>${r.nome} - ${r.setor}<br><br>${r.descricao}`; acao.value=r.acao_tomada||''; parecer.value=r.resposta_admin||''; st.value=r.status; modal.style.display='flex'; }
-async function salvar(){
- const r=await fetch('/api/relatos/'+idAt,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({acao_tomada:acao.value,resposta_admin:parecer.value,status:st.value,data_resposta:new Date().toLocaleString('pt-BR')})});
- if(!r.ok){ alert('Erro ao salvar'); return; } modal.style.display='none'; carregar();
-}
-function sair(){ localStorage.removeItem('delipack_token'); location.reload(); }
-if(token) mostrar();
-</script></body></html>
+ let lista=get().sort((a,b)=> new Date(b.dataHora)-new Date(a.dataHora));
+ let q=busca.value.toLowerCase(), ft=fTipo.value;
+ if(q) lista=lista.filter(x=> JSON.stringify(x).toLowerCase().includes(q));
+ if(ft) lista=lista.filter(x=> x.tipo==ft);
+ kpiTotal.textContent=get().length; kpiAnon.textContent=get().filter(x=>x.anonimo).length; kpiNovos.textContent=get().filter(x=>x.status=='Novo').length; kpiResp.textContent=get().filter(x=>['Respondido','Concluído'].includes(x.status)).length;
+ 
+ // tabela desktop
+ tbody.innerHTML=''; 
+ // cards mobile
+ cards.innerHTML='';
+ lista.forEach(r=>{
+  tbody.innerHTML+=`<tr><td style="white-space:nowrap">${r.dataBR}</td><td><b>${r.tipo}</b></td><td>${r.anonimo?'🕵️ Anônimo':'🙋 '+r.nome}</td><td>${r.setor}</td><td>${r.gravidade}</td><td>${r.local||'-'}</td><td style="max-width:200px"><div style="white-space:normal;overflow:hidden;text-overflow:ellipsis">${r.descricao.slice(0,90)}... ${r.respostaAdmin?'<br><span style="color:green;font-size:11px">✅ Respondido</span>':''}</div></td><td><button class="btn-resp" onclick="abrir('${r.id}')">Responder</button></td></tr>`;
+
   cards.innerHTML+=`
   <div class="card-relato">
     <div class="linha"><span><b>${r.tipo}</b> • ${r.dataBR}</span><span class="badge ${r.status}">${r.status}</span></div>
