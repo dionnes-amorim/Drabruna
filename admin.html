@@ -1,69 +1,80 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Admin Ouvidoria - Delipack</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--azul:#0B2A4A} *{margin:0;padding:0;box-sizing:border-box} body{font-family:Inter;background:#F5F7FA}
-header{background:var(--azul);color:white;padding:14px 3%;display:flex;justify-content:space-between;align-items:center}
-#login{height:100vh;display:flex;justify-content:center;align-items:center}.box{background:white;padding:32px;border-radius:16px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.1)}
-input,select{width:100%;padding:11px;border-radius:10px;border:1px solid #ddd;margin:6px 0}
-.btn{background:var(--azul);color:white;padding:12px;border:none;border-radius:10px;width:100%;font-weight:700;cursor:pointer}
-#app{display:none}.dash{display:grid;grid-template-columns:220px 1fr 300px;gap:16px;padding:16px 2%}
-.card{background:white;border-radius:14px;padding:16px;box-shadow:0 4px 18px rgba(0,0,0,.04)}
-.kpi{font-size:28px;font-weight:800;color:var(--azul)}
-table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:10px;border-bottom:1px solid #eee;text-align:left} th{background:var(--azul);color:white;font-size:11px;letter-spacing:.5px}
-.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}.Novo{background:#FFF4CC}.Em.Análise{background:#D6E8FF}.Respondido{background:#D1FAE5}.Concluído{background:#c8f7c5}.Arquivado{background:#eee}
-.filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.filtros select,.filtros input{width:auto;min-width:140px}
-@media(max-width:1100px){.dash{grid-template-columns:1fr}}
+:root{--azul:#0B2A4A;--verde:#00C896} *{margin:0;padding:0;box-sizing:border-box} body{font-family:Inter;background:#F5F7FA}
+header{background:linear-gradient(135deg,var(--azul) 0%, #123c6a 100%);color:white;padding:18px 3%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.15);position:sticky;top:0;z-index:10;width:100%}
+#login{height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0B2A4A,#123c6a)}.box{background:white;padding:32px;border-radius:18px;width:360px;box-shadow:0 30px 80px rgba(0,0,0,.3);animation:pop.5s}
+@keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+input,select,textarea{width:100%;padding:11px;border-radius:10px;border:1.5px solid #ddd;margin:6px 0;outline:none}
+.btn{background:var(--azul);color:white;padding:12px;border:none;border-radius:10px;width:100%;font-weight:700;cursor:pointer;transition:.2s}.btn:hover{transform:translateY(-1px)}
+#app{display:none}.container{padding:20px 3%}
+.card{background:white;border-radius:16px;padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.04);animation:fadeUp.5s}
+@keyframes fadeUp{0%{transform:translateY(10px);opacity:0}100%{transform:translateY(0);opacity:1}}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.kpi{font-size:26px;font-weight:800;color:var(--azul)}
+table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:12px;border-bottom:1px solid #eee;text-align:left} th{background:var(--azul);color:white;font-size:11px;letter-spacing:.6px;text-transform:uppercase}
+.badge{padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700}.Novo{background:#FFF4CC}.Em.Análise{background:#D6E8FF}.Respondido{background:#D1FAE5}.Concluído{background:#c8f7c5}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);justify-content:center;align-items:center;z-index:99}
+.modal-box{background:white;padding:24px;border-radius:16px;width:520px;max-width:92%;animation:pop.3s}
 </style>
 </head><body>
 
-<div id="login">
-<div class="box"><h2 style="color:var(--azul)">Acesso Restrito</h2><p style="font-size:12px;color:#666;margin:6px 0 14px">Ouvidoria Delipack - Comitê</p>
-<input id="u" placeholder="Usuário (admin)"><input id="p" type="password" placeholder="Senha (delipack2026)"><button class="btn" onclick="logar()">Entrar</button><p id="erro" style="color:red;font-size:12px;margin-top:8px"></p>
-<p style="font-size:10px;color:#999;margin-top:10px">Protegido por LGPD - acesso logado e auditado</p></div>
-</div>
+<div id="login"><div class="box"><h2 style="color:var(--azul)">Ouvidoria Delipack</h2><p style="font-size:12px;color:#666;margin:6px 0 14px">Acesso restrito ao comitê</p><input id="u" placeholder="admin"><input id="p" type="password" placeholder="delipack2026"><button class="btn" onclick="logar()">Entrar no painel</button><p id="erro" style="color:red;font-size:12px;margin-top:8px"></p></div></div>
 
 <div id="app">
-<header><b>DELIPACK • OUVIDORIA - ADMIN</b><div><button onclick="exportar()" style="padding:8px 14px;border-radius:8px;border:none;background:white;color:var(--azul);font-weight:700;cursor:pointer">Exportar Excel</button> <button onclick="sair()" style="padding:8px 14px;border-radius:8px;border:none;background:#ffffff22;color:white;cursor:pointer">Sair</button></div></header>
+<header><div><b>DELIPACK</b> • OUVIDORIA - PAINEL COMPLETO</div><div style="display:flex;gap:10px"><button onclick="exportar()" style="padding:9px 16px;border-radius:10px;border:none;background:white;color:var(--azul);font-weight:800;cursor:pointer">Exportar JSON</button><button onclick="sair()" style="padding:9px 16px;border-radius:10px;border:none;background:rgba(255,255,255,.15);color:white;cursor:pointer">Sair</button></div></header>
 
-<div class="dash">
-<div><div class="card"><div style="font-size:12px;color:#666">Total</div><div class="kpi" id="kpiTotal">0</div></div><div class="card" style="margin-top:12px"><div style="font-size:12px;color:#666">Anônimos</div><div class="kpi" id="kpiAnon">0</div></div><div class="card" style="margin-top:12px"><canvas id="chartTipo" height="200"></canvas></div></div>
+<div class="container">
+<div class="kpis">
+<div class="card"><div style="font-size:11px;color:#666;letter-spacing:1px">TOTAL DE RELATOS</div><div class="kpi" id="kpiTotal">0</div></div>
+<div class="card"><div style="font-size:11px;color:#666">ANÔNIMOS</div><div class="kpi" id="kpiAnon">0</div></div>
+<div class="card"><div style="font-size:11px;color:#666">NOVOS</div><div class="kpi" id="kpiNovos">0</div></div>
+<div class="card"><div style="font-size:11px;color:#666">RESPONDIDOS / CONCLUÍDOS</div><div class="kpi" id="kpiResp">0</div></div>
+</div>
 
 <div class="card">
-<div class="filtros"><input id="busca" placeholder="Buscar por protocolo, nome, tipo..." oninput="render()"><select id="fStatus" onchange="render()"><option value="">Todos status</option><option>Novo</option><option>Em Análise</option><option>Respondido</option><option>Concluído</option><option>Arquivado</option></select><select id="fTipo" onchange="render()"><option value="">Todos tipos</option><option>Denúncia</option><option>Reclamação</option><option>Sugestão</option><option>Elogio</option><option>Dúvida</option><option>Assédio Moral / Sexual</option></select></div>
-<table><thead><tr><th>Data/Hora</th><th>Protocolo</th><th>Tipo</th><th>Anon?</th><th>Identificação</th><th>Gravidade</th><th>Status</th><th>Ação</th></tr></thead><tbody id="tbody"></tbody></table>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+<input id="busca" placeholder="Buscar por tipo, nome, descrição..." style="flex:1;min-width:200px" oninput="render()">
+<select id="fTipo" onchange="render()" style="width:200px"><option value="">Todos os tipos</option><option>Denúncia</option><option>Reclamação</option><option>Assédio Moral / Sexual</option><option>Sugestão</option><option>Elogio</option><option>Dúvida</option></select>
+</div>
+<table><thead><tr><th>Data/Hora</th><th>Tipo</th><th>Anônimo?</th><th>Identificação</th><th>Gravidade</th><th>Local</th><th>Relato (resumo)</th><th>Ação</th></tr></thead><tbody id="tbody"></tbody></table>
+</div>
+</div>
 </div>
 
-<div class="card"><h3 style="color:var(--azul);font-size:14px">Detalhes do relato</h3><div id="detalhe" style="font-size:13px;line-height:1.6;margin-top:10px;color:#333">Clique em um relato para ver</div><div id="acoes" style="margin-top:12px"></div></div>
-</div>
-</div>
+<div class="modal" id="modal"><div class="modal-box">
+<h3 style="color:var(--azul)">Responder / Registrar ação tomada</h3>
+<p style="font-size:12px;color:#666;margin:6px 0 10px">Este comentário fica registrado internamente no painel (não vai pro funcionário, pois é anônimo). Use para registrar investigação, ação corretiva, etc.</p>
+<div style="background:#f9fafb;padding:12px;border-radius:10px;font-size:13px;margin:10px 0" id="modalInfo"></div>
+<label style="font-size:11px;font-weight:800">O que foi feito? Ação tomada / Investigação</label><textarea id="acao" rows="4" placeholder="Ex: Foi feita entrevista com o setor, verificado câmeras, aplicado treinamento..."></textarea>
+<label style="font-size:11px;font-weight:800;margin-top:8px;display:block">Parecer / Resposta interna</label><textarea id="parecer" rows="3" placeholder="Ex: Procede / Não procede / Em acompanhamento"></textarea>
+<label style="font-size:11px;font-weight:800">Status final</label><select id="statusFinal"><option>Novo</option><option>Em Análise</option><option>Respondido</option><option>Concluído</option><option>Arquivado</option></select>
+<br><button class="btn" style="margin-top:10px" onclick="salvarResposta()">Salvar resposta e ação</button>
+<button onclick="fechar()" style="margin-top:8px;width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;background:white;cursor:pointer">Cancelar</button>
+</div></div>
 
 <script>
 const KEY='delipack_ouv'; const get=()=>JSON.parse(localStorage.getItem(KEY)||'[]'), save=a=>localStorage.setItem(KEY,JSON.stringify(a));
+let idAtivo=null;
 function logar(){ if(u.value.toLowerCase()=='admin' && p.value=='delipack2026'){ localStorage.setItem('delipack_login','ok'); mostrar(); } else erro.textContent='Login inválido'; }
-function mostrar(){ login.style.display='none'; app.style.display='block'; render(); montarGrafico(); }
+function mostrar(){ login.style.display='none'; app.style.display='block'; render(); }
 function sair(){ localStorage.removeItem('delipack_login'); location.reload(); }
 function render(){
  let lista=get().sort((a,b)=> new Date(b.dataHora)-new Date(a.dataHora));
- let q=busca.value.toLowerCase(), fs=fStatus.value, ft=fTipo.value;
- lista=lista.filter(x=> (!q || JSON.stringify(x).toLowerCase().includes(q)) && (!fs || x.status==fs) && (!ft || x.tipo==ft) );
- kpiTotal.textContent=get().length; kpiAnon.textContent=get().filter(x=>x.anonimo).length;
- tbody.innerHTML=''; lista.forEach((r,i)=>{
-  tbody.innerHTML+=`<tr style="cursor:pointer" onclick="ver('${r.id}')"><td>${r.dataBR}</td><td><b>${r.id}</b></td><td>${r.tipo}</td><td>${r.anonimo?'🕵️ Sim':'🙋 Não'}</td><td>${r.nome}<br><small style="color:#777">${r.setor}</small></td><td>${r.gravidade}</td><td><span class="badge ${r.status}">${r.status}</span></td><td><button onclick="event.stopPropagation(); mudarStatus('${r.id}')">Mudar status</button></td></tr>`;
+ let q=busca.value.toLowerCase(), ft=fTipo.value;
+ if(q) lista=lista.filter(x=> JSON.stringify(x).toLowerCase().includes(q));
+ if(ft) lista=lista.filter(x=> x.tipo==ft);
+ kpiTotal.textContent=get().length; kpiAnon.textContent=get().filter(x=>x.anonimo).length; kpiNovos.textContent=get().filter(x=>x.status=='Novo').length; kpiResp.textContent=get().filter(x=>['Respondido','Concluído'].includes(x.status)).length;
+ tbody.innerHTML=''; lista.forEach(r=>{
+  tbody.innerHTML+=`<tr><td style="white-space:nowrap">${r.dataBR}</td><td><b>${r.tipo}</b></td><td>${r.anonimo?'🕵️ Anônimo':'🙋 '+r.nome}</td><td>${r.setor}</td><td>${r.gravidade}</td><td>${r.local||'-'}</td><td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${r.descricao}">${r.descricao.slice(0,70)}... ${r.respostaAdmin?'<br><span style="color:green;font-size:11px">✅ Respondido</span>':''}</td><td><button onclick="abrir('${r.id}')" style="padding:7px 12px;border-radius:20px;border:none;background:var(--azul);color:white;font-weight:700;cursor:pointer">Responder</button></td></tr>`;
  });
 }
-function ver(id){ let r=get().find(x=>x.id==id); detalhe.innerHTML=`<b>Protocolo:</b> ${r.id}<br><b>Data/Hora:</b> ${r.dataBR}<br><b>Tipo:</b> ${r.tipo}<br><b>Gravidade:</b> ${r.gravidade}<br><b>Anônimo:</b> ${r.anonimo?'SIM - identidade protegida por LGPD':'NÃO'}<br><b>Nome:</b> ${r.nome}<br><b>CPF:</b> ${r.cpf||'-'}<br><b>Setor:</b> ${r.setor}<br><b>Contato:</b> ${r.contato}<br><b>Data ocorrido:</b> ${r.dataOcorrido||'-'}<br><b>Anexo:</b> ${r.anexo}<br><hr style="margin:10px 0"><b>Descrição:</b><br>${r.descricao}`; acoes.innerHTML=`<select id="selStatus"><option>Novo</option><option>Em Análise</option><option>Respondido</option><option>Concluído</option><option>Arquivado</option></select><button class="btn" style="margin-top:8px" onclick="salvarStatus('${r.id}')">Salvar status</button><br><br><button onclick="copiar('${r.id}')" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:white;cursor:pointer">Copiar relato</button>`; document.getElementById('selStatus').value=r.status; }
-function mudarStatus(id){ let r=get().find(x=>x.id==id); let novo=prompt(`Mudar status de ${id} - digite: Novo, Em Análise, Respondido, Concluído, Arquivado`, r.status); if(novo){ let lista=get(); let idx=lista.findIndex(x=>x.id==id); lista[idx].status=novo; save(lista); render(); } }
-function salvarStatus(id){ let lista=get(); let idx=lista.findIndex(x=>x.id==id); lista[idx].status=document.getElementById('selStatus').value; save(lista); render(); alert('Status atualizado'); }
-function exportar(){ let blob=new Blob([JSON.stringify(get(),null,2)],{type:'application/json'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ouvidoria_delipack.json'; a.click(); }
-function copiar(id){ let r=get().find(x=>x.id==id); navigator.clipboard.writeText(JSON.stringify(r,null,2)); alert('Copiado'); }
-function montarGrafico(){
- let lista=get(); let tipos={}; lista.forEach(r=> tipos[r.tipo]=(tipos[r.tipo]||0)+1);
- new Chart(document.getElementById('chartTipo'), {type:'doughnut', data:{labels:Object.keys(tipos), datasets:[{data:Object.values(tipos), backgroundColor:['#0B2A4A','#00C896','#F59E0B','#EF4444','#8B5CF6','#06B6D4']}]}, options:{plugins:{title:{display:true,text:'Por tipo de manifestação'}}}});
-}
+function abrir(id){ idAtivo=id; let r=get().find(x=>x.id==id); modalInfo.innerHTML=`<b>${r.tipo} - ${r.dataBR}</b><br><b>Quem:</b> ${r.nome} (${r.setor})<br><b>Gravidade:</b> ${r.gravidade}<br><br>${r.descricao}`; acao.value=r.acaoTomada||''; parecer.value=r.respostaAdmin||''; statusFinal.value=r.status||'Novo'; modal.style.display='flex'; }
+function fechar(){ modal.style.display='none'; }
+function salvarResposta(){ let lista=get(); let idx=lista.findIndex(x=>x.id==idAtivo); lista[idx].acaoTomada=acao.value; lista[idx].respostaAdmin=parecer.value; lista[idx].status=statusFinal.value; lista[idx].dataResposta=new Date().toLocaleString('pt-BR'); save(lista); fechar(); render(); }
+function exportar(){ let blob=new Blob([JSON.stringify(get(),null,2)],{type:'application/json'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ouvidoria_delipack_completa.json'; a.click(); }
 if(localStorage.getItem('delipack_login')=='ok') mostrar();
 </script>
 </body></html>
