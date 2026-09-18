@@ -18,45 +18,37 @@ input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1.5px so
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .filters input{flex:1;min-width:200px}
 .filters select{min-width:160px;width:auto}
-
-/* TABELA DESKTOP */
 .table-wrap{background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.05);overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
-th,td{padding:12px;text-align:left;border-bottom:1px solid #eee;white-space:nowrap} 
+th,td{padding:12px;text-align:left;border-bottom:1px solid #eee;white-space:nowrap}
 th{background:var(--azul);color:white;font-size:11px;letter-spacing:.6px;text-transform:uppercase;position:sticky;top:0}
 td{white-space:normal;vertical-align:top}
 .btn-resp{padding:8px 14px;border-radius:20px;border:none;background:var(--azul);color:white;font-weight:700;cursor:pointer;font-size:12px}
-
-/* CARDS MOBILE - ESCONDE TABELA E MOSTRA CARD */
 .cards{display:none;grid-template-columns:1fr;gap:12px}
 .card-relato{background:white;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.05);border-left:5px solid var(--azul)}
-.card-relato .linha{display:flex;justify-content:space-between;margin:4px 0;font-size:12px}
-.card-relato .desc{font-size:13px;color:#333;background:#f9fafb;padding:10px;border-radius:10px;margin:8px 0;line-height:1.5}
+.card-relato.linha{display:flex;justify-content:space-between;margin:4px 0;font-size:12px}
+.card-relato.desc{font-size:13px;color:#333;background:#f9fafb;padding:10px;border-radius:10px;margin:8px 0;line-height:1.5}
 .badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block}
 .Novo{background:#FFF4CC}.Em.Análise{background:#D6E8FF}.Respondido{background:#D1FAE5}.Concluído{background:#c8f7c5}
-
-/* MODAL */
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);justify-content:center;align-items:center;z-index:99;padding:16px}
 .modal-box{background:white;padding:22px;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow:auto}
-
-/* RESPONSIVO */
 @media(max-width:900px){
-  .kpis{grid-template-columns:1fr 1fr}
-  .table-wrap{display:none}
-  .cards{display:grid}
+ .kpis{grid-template-columns:1fr 1fr}
+ .table-wrap{display:none}
+ .cards{display:grid}
   header{padding:12px 4%}
   header b{font-size:12px}
 }
 @media(max-width:480px){
-  .kpis{grid-template-columns:1fr 1fr}
-  .kpi{font-size:22px}
+ .kpis{grid-template-columns:1fr 1fr}
+ .kpi{font-size:22px}
 }
 </style>
 </head><body>
 
-<div id="login"><div class="box"><h2 style="color:var(--azul)">Ouvidoria Delipack</h2><p style="font-size:12px;color:#666;margin:6px 0 14px">Acesso restrito ao comitê</p><input id="u" placeholder="admin"><input id="p" type="password" placeholder="delipack2026"><button class="btn" onclick="logar()">Entrar no painel</button><p id="erro" style="color:red;font-size:12px;margin-top:8px"></p></div></div>
+<div id="login"><div class="box"><h2 style="color:var(--azul)">Ouvidoria Delipack</h2><p style="font-size:12px;color:#666;margin:6px 0 14px">Acesso restrito ao comitê</p><input id="u" placeholder="admin@delipack.com.br" value="admin@delipack.com.br"><input id="p" type="password" placeholder="senha do Render"><button class="btn" id="btnLogin" onclick="logar()">Entrar no painel</button><p id="erro" style="color:red;font-size:12px;margin-top:8px"></p></div></div>
 
-<div id="app">
+<div id="app" style="display:none">
 <header><b>DELIPACK • OUVIDORIA</b><div style="display:flex;gap:8px"><button onclick="exportar()" style="padding:9px 14px;border-radius:10px;border:none;background:white;color:var(--azul);font-weight:800;cursor:pointer;font-size:12px">Exportar</button><button onclick="sair()" style="padding:9px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.2);color:white;cursor:pointer;font-size:12px">Sair</button></div></header>
 
 <div class="container">
@@ -89,25 +81,80 @@ td{white-space:normal;vertical-align:top}
 </div></div>
 
 <script>
-const KEY='delipack_ouv'; const get=()=>JSON.parse(localStorage.getItem(KEY)||'[]'), save=a=>localStorage.setItem(KEY,JSON.stringify(a));
-let idAtivo=null;
-function logar(){ if(u.value.toLowerCase()=='admin' && p.value=='delipack2026'){ localStorage.setItem('delipack_login','ok'); mostrar(); } else erro.textContent='Login inválido'; }
-function mostrar(){ login.style.display='none'; app.style.display='block'; render(); }
-function sair(){ localStorage.removeItem('delipack_login'); location.reload(); }
-function render(){
- let lista=get().sort((a,b)=> new Date(b.dataHora)-new Date(a.dataHora));
- let q=busca.value.toLowerCase(), ft=fTipo.value;
- if(q) lista=lista.filter(x=> JSON.stringify(x).toLowerCase().includes(q));
- if(ft) lista=lista.filter(x=> x.tipo==ft);
- kpiTotal.textContent=get().length; kpiAnon.textContent=get().filter(x=>x.anonimo).length; kpiNovos.textContent=get().filter(x=>x.status=='Novo').length; kpiResp.textContent=get().filter(x=>['Respondido','Concluído'].includes(x.status)).length;
- 
- // tabela desktop
- tbody.innerHTML=''; 
- // cards mobile
- cards.innerHTML='';
- lista.forEach(r=>{
-  tbody.innerHTML+=`<tr><td style="white-space:nowrap">${r.dataBR}</td><td><b>${r.tipo}</b></td><td>${r.anonimo?'🕵️ Anônimo':'🙋 '+r.nome}</td><td>${r.setor}</td><td>${r.gravidade}</td><td>${r.local||'-'}</td><td style="max-width:200px"><div style="white-space:normal;overflow:hidden;text-overflow:ellipsis">${r.descricao.slice(0,90)}... ${r.respostaAdmin?'<br><span style="color:green;font-size:11px">✅ Respondido</span>':''}</div></td><td><button class="btn-resp" onclick="abrir('${r.id}')">Responder</button></td></tr>`;
+let lista=[], idAtivo=null, token=localStorage.getItem('delipack_token');
 
+async function logar(){
+  const btn=document.getElementById('btnLogin');
+  const erro=document.getElementById('erro');
+  btn.textContent='Entrando...'; btn.disabled=true; erro.textContent='';
+  try{
+    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('u').value.trim(),password:document.getElementById('p').value})});
+    const j=await r.json();
+    if(!r.ok){ erro.textContent=j.error||'Login inválido'; btn.textContent='Entrar no painel'; btn.disabled=false; return; }
+    token=j.token; localStorage.setItem('delipack_token',token);
+    mostrar();
+  }catch(e){
+    erro.textContent='Servidor acordando... aguarde 20s e tente de novo (erro Render 502)';
+    btn.textContent='Entrar no painel'; btn.disabled=false;
+  }
+}
+
+function mostrar(){ document.getElementById('login').style.display='none'; document.getElementById('app').style.display='block'; carregar(); }
+
+async function carregar(){
+  try{
+    const r=await fetch('/api/relatos',{headers:{Authorization:'Bearer '+token}});
+    if(!r.ok){ sair(); return; }
+    lista=await r.json();
+    render();
+  }catch(e){ console.log(e); }
+}
+
+function render(){
+ let l=[...lista];
+ let q=document.getElementById('busca').value.toLowerCase(), ft=document.getElementById('fTipo').value;
+ if(q) l=l.filter(x=> JSON.stringify(x).toLowerCase().includes(q));
+ if(ft) l=l.filter(x=> x.tipo==ft);
+
+ document.getElementById('kpiTotal').textContent=lista.length;
+ document.getElementById('kpiAnon').textContent=lista.filter(x=>x.anonimo).length;
+ document.getElementById('kpiNovos').textContent=lista.filter(x=>x.status=='Novo').length;
+ document.getElementById('kpiResp').textContent=lista.filter(x=>['Respondido','Concluído'].includes(x.status)).length;
+
+ const tbody=document.getElementById('tbody'); const cards=document.getElementById('cards');
+ tbody.innerHTML=''; cards.innerHTML='';
+ l.forEach(r=>{
+  tbody.innerHTML+=`<tr><td style="white-space:nowrap">${r.data_br||new Date(r.created_at).toLocaleDateString('pt-BR')}</td><td><b>${r.tipo}</b></td><td>${r.anonimo?'🕵️ Anônimo':'🙋 '+(r.nome||'')}</td><td>${r.setor||''}</td><td>${r.gravidade||'-'}</td><td>${r.local||'-'}</td><td style="max-width:200px"><div style="white-space:normal;overflow:hidden;text-overflow:ellipsis">${(r.descricao||'').slice(0,90)}... ${r.resposta_admin||r.acao_tomada?'<br><span style="color:green;font-size:11px">✅ Respondido</span>':''}</div></td><td><button class="btn-resp" onclick="abrir('${r.id}')">Responder</button></td></tr>`;
+  cards.innerHTML+=`
+  <div class="card-relato">
+    <div class="linha"><span><b>${r.tipo}</b> • ${r.data_br||''}</span><span class="badge ${r.status}">${r.status||'Novo'}</span></div>
+    <div class="linha"><span>👤 ${r.anonimo?'🕵️ Anônimo':r.nome||''}</span><span>📍 ${r.local||'-'}</span></div>
+    <div class="linha"><span>⚠️ ${r.gravidade||'-'}</span><span>${r.setor||''}</span></div>
+    <div class="desc">${r.descricao||''}<br>${r.resposta_admin?`<small style="color:green"><b>Ação:</b> ${r.acao_tomada||''}<br><b>Parecer:</b> ${r.resposta_admin}</small>`:''}</div>
+    <button class="btn-resp" style="width:100%" onclick="abrir('${r.id}')">Responder</button>
+  </div>`;
+ });
+}
+
+function abrir(id){ idAtivo=id; let r=lista.find(x=>x.id==id); document.getElementById('modalInfo').innerHTML=`<b>${r.tipo} - ${r.data_br||''}</b><br>${r.nome||''} - ${r.setor||''}<br><br>${r.descricao||''}`; document.getElementById('acao').value=r.acao_tomada||''; document.getElementById('parecer').value=r.resposta_admin||''; document.getElementById('statusFinal').value=r.status||'Novo'; document.getElementById('modal').style.display='flex'; }
+function fechar(){ document.getElementById('modal').style.display='none'; }
+
+async function salvarResposta(){
+ const r=await fetch('/api/relatos/'+idAtivo,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({acao_tomada:document.getElementById('acao').value,resposta_admin:document.getElementById('parecer').value,status:document.getElementById('statusFinal').value,data_resposta:new Date().toLocaleString('pt-BR')})});
+ if(!r.ok){ alert('Erro ao salvar'); return; }
+ fechar(); carregar();
+}
+
+function exportar(){
+ let csv='Data,Tipo,Nome,Setor,Gravidade,Local,Descricao,Status,Acao,Parecer\n';
+ lista.forEach(r=>{ csv+=`"${r.data_br||''}","${r.tipo}","${r.nome}","${r.setor}","${r.gravidade}","${r.local}","${(r.descricao||'').replace(/"/g,'""')}","${r.status}","${(r.acao_tomada||'').replace(/"/g,'""')}","${(r.resposta_admin||'').replace(/"/g,'""')}"\n`; });
+ let blob=new Blob([csv],{type:'text/csv'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ouvidoria-delipack.csv'; a.click();
+}
+
+function sair(){ localStorage.removeItem('delipack_token'); location.reload(); }
+if(token){ mostrar(); }
+</script>
+</body></html>
   cards.innerHTML+=`
   <div class="card-relato">
     <div class="linha"><span><b>${r.tipo}</b> • ${r.dataBR}</span><span class="badge ${r.status}">${r.status}</span></div>
