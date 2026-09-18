@@ -1,104 +1,41 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ouvidoria Delipack | Canal Seguro</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
-<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-<style>
-:root{--azul:#0B2A4A;--azul2:#123c6a;--verde:#00C896;--cinza:#F5F7FA}
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter;background:var(--cinza);color:#111;overflow-x:hidden}
-.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border-bottom:1px solid #e5e7eb;padding:14px 5%;display:flex;justify-content:space-between;align-items:center}
-.logo{font-weight:800;color:var(--azul);font-size:22px;letter-spacing:.5px}.logo span{color:var(--verde)}
-.hero{background:linear-gradient(135deg,var(--azul) 0%, #0f3e72 50%, #164d8a 100%);color:white;padding:70px 5%;display:grid;grid-template-columns:1.2fr.8fr;gap:30px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle, rgba(0,200,150,.18) 0%, transparent 70%);animation:float 6s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
-.card-garantia{background:rgba(255,255,255,.1);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);padding:18px;border-radius:16px;margin-top:16px;animation:fadeIn.8s}
-.form-wrap{max-width:860px;margin:-40px auto 40px;background:white;border-radius:24px;box-shadow:0 24px 80px rgba(0,0,0,.12);padding:32px;border:1px solid #eef1f4;position:relative;z-index:2}
-.label{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--azul);margin:20px 0 8px;display:block}
-input,select,textarea{width:100%;padding:14px 14px;border-radius:12px;border:1.5px solid #e5e7eb;font-size:14px;outline:none;transition:.3s}
-input:focus,select:focus,textarea:focus{border-color:var(--azul);box-shadow:0 0 0 4px rgba(11,42,74,.08)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.toggle{display:flex;gap:10px;margin:10px 0}
-.toggle button{flex:1;padding:14px;border-radius:12px;border:1.5px solid #e5e7eb;background:white;cursor:pointer;font-weight:700;transition:.3s}
-.toggle button.active{background:var(--azul);color:white;border-color:var(--azul);transform:translateY(-1px);box-shadow:0 8px 20px rgba(11,42,74,.2)}
-.btn-enviar{background:linear-gradient(135deg,var(--azul),var(--azul2));color:white;padding:18px;width:100%;border:none;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;margin-top:22px;transition:.3s;letter-spacing:.3px}
-.btn-enviar:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(11,42,74,.3)}
-.aviso-lgpd{background:#F0FDF4;border:1px solid #bbf7d0;padding:14px;border-radius:12px;font-size:12px;line-height:1.6;margin-top:18px;color:#065f46}
-.protocolo{display:none;text-align:center;padding:50px 20px}.protocolo h2{color:var(--azul);font-size:34px}.ok-anim{font-size:64px;animation:pop.6s cubic-bezier(.68,-0.55,.27,1.55)}
-@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
-@media(max-width:900px){.hero{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<div class="top" data-aos="fade-down"><div class="logo">DELI<span>PACK</span> | OUVIDORIA</div><div style="font-size:11px;color:#666;letter-spacing:1px">CANAL INDEPENDENTE E SIGILOSO</div></div>
-
-<div class="hero">
-<div data-aos="fade-right">
-<h1 style="font-size:48px;line-height:.9">Fale com<br>segurança.</h1>
-<p style="opacity:.9;margin:16px 0;line-height:1.7;font-size:16px">Seu relato é 100% confidencial e protegido contra retaliação. Relate sem medo.</p>
-<div class="card-garantia">✅ <b>Anonimato garantido</b> • LGPD • Sem coleta de IP • Comitê independente</div>
-</div>
-<div data-aos="zoom-in" data-aos-delay="200" style="background:white;color:#111;padding:22px;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.15)">
-<b style="color:var(--azul)">O que posso relatar?</b><ul style="font-size:13px;margin:12px 0 0 18px;line-height:2"><li>Denúncia / Assédio</li><li>Reclamação</li><li>Sugestão / Elogio / Dúvida</li></ul>
-</div>
-</div>
-
-<div class="form-wrap" id="formArea" data-aos="fade-up">
-<h2 style="color:var(--azul);font-size:28px">Novo relato</h2>
-
-<label class="label">Você quer se identificar?</label>
-<div class="toggle"><button id="btnAnon" class="active" onclick="setAnon(true)">🕵️ ANÔNIMO</button><button id="btnIdent" onclick="setAnon(false)">🙋 ME IDENTIFICAR</button></div>
-
-<div id="identFields" style="display:none">
-<div class="grid2"><div><label class="label">Nome completo *</label><input id="nome"></div><div><label class="label">Setor *</label><select id="setor"><option>Produção</option><option>Logística</option><option>Administrativo</option><option>Comercial</option><option>Qualidade</option><option>Terceiro</option></select></div></div>
-<div><label class="label">Contato (email ou telefone) *</label><input id="contato"></div>
-</div>
-
-<label class="label">Tipo de manifestação *</label>
-<select id="tipo" onchange="checkGravidade()"><option>Denúncia</option><option>Reclamação</option><option>Assédio Moral / Sexual</option><option>Sugestão</option><option>Elogio</option><option>Dúvida</option></select>
-
-<div id="boxGravidade"><label class="label">Gravidade *</label><select id="gravidade"><option>Média</option><option>Alta</option><option>Urgente - Risco imediato</option><option>Baixa</option></select></div>
-
-<div class="grid2"><div><label class="label">Data do ocorrido (se souber)</label><input type="date" id="dataOcorrido"></div><div><label class="label">Local / Setor do fato</label><input id="local" placeholder="Ex: Linha 2 - Expedição"></div></div>
-
-<label class="label">Descreva o fato *</label>
-<textarea id="desc" rows="6" placeholder="O que aconteceu? Onde? Quando? Quem estava envolvido?"></textarea>
-
-<label class="label">Anexo (opcional)</label><input type="file" id="anexo">
-
-<div class="aviso-lgpd">🔒 Seus dados são tratados apenas pelo comitê de ouvidoria, com sigilo total. Relato anônimo não coleta nenhum dado pessoal. Lei 13.303/2016 - proteção contra retaliação.</div>
-<button class="btn-enviar" onclick="enviar()">ENVIAR RELATO COM SEGURANÇA →</button>
-</div>
-
-<div class="form-wrap protocolo" id="okArea">
-<div class="ok-anim">✅</div><h2 style="margin-top:12px">Relato enviado!</h2>
-<p style="color:#555;margin:14px auto;max-width:420px;line-height:1.6">Recebemos sua informação com segurança. Nossa equipe de ouvidoria vai avaliar o seu relato com total sigilo e tomar as providências necessárias.<br><br><b style="color:var(--azul)">Obrigado por ajudar a Delipack a ser uma empresa melhor.</b></p>
-<button class="btn-enviar" style="max-width:300px;margin:20px auto;display:block" onclick="location.reload()">Enviar outro relato</button>
-</div>
-
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script><script>AOS.init({duration:800,once:true});</script>
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ouvidoria Delipack</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>:root{--azul:#0B2A4A;--verde:#00C896}*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter;background:#F5F7FA}
+.top{background:rgba(255,255,255,.9);backdrop-filter:blur(12px);padding:14px 5%;display:flex;justify-content:space-between;border-bottom:1px solid #eee;position:sticky;top:0}
+.logo{font-weight:800;color:var(--azul);font-size:22px}.logo span{color:var(--verde)}
+.hero{background:linear-gradient(135deg,var(--azul),#123c6a);color:white;padding:60px 5%;display:grid;grid-template-columns:1.2fr.8fr;gap:20px}
+.form-wrap{max-width:860px;margin:-30px auto 40px;background:white;border-radius:24px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.1)}
+.label{font-size:11px;font-weight:800;color:var(--azul);margin:18px 0 6px;display:block;text-transform:uppercase}
+input,select,textarea{width:100%;padding:13px;border-radius:12px;border:1.5px solid #e5e7eb}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.toggle{display:flex;gap:10px}.toggle button{flex:1;padding:12px;border-radius:12px;border:1.5px solid #ddd;background:white;font-weight:700;cursor:pointer}.toggle button.active{background:var(--azul);color:white}
+.btn{background:var(--azul);color:white;padding:16px;width:100%;border:none;border-radius:12px;font-weight:800;margin-top:16px;cursor:pointer}
+.ok{display:none;text-align:center;padding:40px}.ok h2{color:var(--azul);font-size:32px}
+@media(max-width:800px){.hero{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}}
+</style></head><body>
+<div class="top"><div class="logo">DELI<span>PACK</span> | OUVIDORIA</div><div style="font-size:11px">CANAL SIGILOSO</div></div>
+<div class="hero"><div><h1 style="font-size:44px;line-height:.9">Fale com<br>segurança.</h1><p style="margin:14px 0;opacity:.9">100% confidencial e protegido contra retaliação.</p></div><div style="background:white;color:#111;padding:18px;border-radius:16px"><b style="color:var(--azul)">Pode relatar:</b><ul style="margin:8px 0 0 18px;font-size:13px;line-height:1.9"><li>Denúncia / Assédio</li><li>Reclamação / Sugestão</li></ul></div></div>
+<div class="form-wrap" id="formArea"><h2 style="color:var(--azul)">Novo relato</h2>
+<label class="label">Se identificar?</label><div class="toggle"><button id="bA" class="active" onclick="setAnon(true)">🕵️ ANÔNIMO</button><button id="bI" onclick="setAnon(false)">🙋 IDENTIFICAR</button></div>
+<div id="ident" style="display:none"><div class="grid2"><div><label class="label">Nome *</label><input id="nome"></div><div><label class="label">Setor *</label><select id="setor"><option>Produção</option><option>Logística</option><option>Administrativo</option><option>Comercial</option><option>Qualidade</option></select></div></div><label class="label">Contato *</label><input id="contato"></div>
+<label class="label">Tipo *</label><select id="tipo" onchange="chg()"><option>Denúncia</option><option>Reclamação</option><option>Assédio Moral / Sexual</option><option>Sugestão</option><option>Elogio</option><option>Dúvida</option></select>
+<div id="gravBox"><label class="label">Gravidade *</label><select id="gravidade"><option>Média</option><option>Alta</option><option>Urgente - Risco imediato</option><option>Baixa</option></select></div>
+<div class="grid2"><div><label class="label">Data ocorrido</label><input type="date" id="dataOcorrido"></div><div><label class="label">Local</label><input id="local" placeholder="Ex: Expedição"></div></div>
+<label class="label">Descrição *</label><textarea id="desc" rows="5" placeholder="Descreva o fato..."></textarea>
+<button class="btn" id="btnSend" onclick="enviar()">ENVIAR COM SEGURANÇA →</button></div>
+<div class="form-wrap ok" id="okArea"><div style="font-size:60px">✅</div><h2>Relato enviado!</h2><p style="color:#666;margin:12px 0">Avaliaremos com sigilo total. Obrigado por ajudar a Delipack.</p><button class="btn" onclick="location.reload()" style="max-width:280px">Novo relato</button></div>
 <script>
-let isAnon=true;
-function setAnon(v){ isAnon=v; btnAnon.classList.toggle('active',v); btnIdent.classList.toggle('active',!v); identFields.style.display=v?'none':'block'; }
-function checkGravidade(){
- let t=tipo.value; let hide=['Sugestão','Elogio','Dúvida'].includes(t);
- document.getElementById('boxGravidade').style.display=hide?'none':'block';
+let anon=true; function setAnon(v){anon=v;bA.classList.toggle('active',v);bI.classList.toggle('active',!v);ident.style.display=v?'none':'block'}
+function chg(){gravBox.style.display=['Sugestão','Elogio','Dúvida'].includes(tipo.value)?'none':'block'} chg();
+async function enviar(){
+ if(desc.value.length<15) return alert('Descreva melhor');
+ if(!anon && (!nome.value||!contato.value)) return alert('Preencha nome e contato');
+ btnSend.disabled=true; btnSend.textContent='Enviando...';
+ const r = await fetch('/api/relatos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+  data_br:new Date().toLocaleString('pt-BR'), anonimo:anon, nome:anon?'ANÔNIMO':nome.value, setor:anon?'Não informado':setor.value,
+  contato:anon?'Anônimo':contato.value, tipo:tipo.value, gravidade:gravBox.style.display=='none'?'Não se aplica':gravidade.value,
+  local:local.value, data_ocorrido:dataOcorrido.value, descricao:desc.value, status:'Novo'
+ })});
+ if(!r.ok){ const e=await r.json(); alert(e.error); btnSend.disabled=false; btnSend.textContent='ENVIAR COM SEGURANÇA →'; return; }
+ formArea.style.display='none'; okArea.style.display='block';
 }
-checkGravidade();
-function enviar(){
- if(desc.value.trim().length<15){ alert('Descreva com mais detalhes'); return; }
- if(!isAnon && (!nome.value ||!contato.value)){ alert('Preencha nome e contato'); return; }
- const reg={
-  id:'DLP-'+Math.random().toString(36).toUpperCase().slice(2,7), dataHora:new Date().toISOString(), dataBR:new Date().toLocaleString('pt-BR'),
-  anonimo:isAnon, nome:isAnon?'ANÔNIMO':nome.value, setor:isAnon?'Não informado':setor.value, contato:isAnon?'Anônimo':contato.value,
-  tipo:tipo.value, gravidade: document.getElementById('boxGravidade').style.display=='none'? 'Não se aplica' : gravidade.value,
-  local:local.value, dataOcorrido:dataOcorrido.value, descricao:desc.value, status:'Novo', anexo:anexo.files[0]?.name||'Nenhum',
-  respostaAdmin:'', acaoTomada:'', dataResposta:''
- };
- let lista=JSON.parse(localStorage.getItem('delipack_ouv')||'[]'); lista.push(reg); localStorage.setItem('delipack_ouv',JSON.stringify(lista));
- formArea.style.display='none'; okArea.style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
-}
-</script>
-</body>
-</html>
+</script></body></html>
