@@ -6,108 +6,49 @@
 <title>Admin - Ouvidoria Delipack</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}
-body{background:#f4f5f7;min-height:100vh}
-#login-screen{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#0f172a}
-.login-box{background:white;padding:40px;border-radius:16px;width:100%;max-width:380px;box-shadow:0 20px 40px rgba(0,0,0,0.2)}
-.login-box h2{margin-bottom:8px;color:#0f172a}
-.login-box p{margin-bottom:24px;color:#64748b;font-size:14px}
-.login-box input{width:100%;padding:12px 14px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:12px;font-size:15px}
-.login-box button{width:100%;padding:12px;background:#0f172a;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:15px}
-.login-box button:hover{background:#1e293b}
-.login-box button:disabled{opacity:0.6}
-#admin-panel{display:none;padding:24px;max-width:1200px;margin:0 auto}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;background:white;padding:16px 20px;border-radius:12px}
-.header h1{font-size:20px}
-.btn-sair{padding:8px 16px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer}
-.card{background:white;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);overflow:auto}
+body{background:#f4f5f7;padding:24px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;background:white;padding:16px 20px;border-radius:12px;max-width:1200px;margin:0 auto 20px auto}
+.card{background:white;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);max-width:1200px;margin:0 auto;overflow:auto}
 table{width:100%;border-collapse:collapse}
-th{ text-align:left;padding:12px;border-bottom:2px solid #f1f5f9;color:#64748b;font-size:12px;text-transform:uppercase}
+th{text-align:left;padding:12px;border-bottom:2px solid #f1f5f9;color:#64748b;font-size:12px;text-transform:uppercase}
 td{padding:12px;border-bottom:1px solid #f1f5f9;font-size:14px}
 .badge{padding:4px 8px;border-radius:20px;font-size:11px;font-weight:600}
 .pendente{background:#fef3c7;color:#92400e}
-.analise{background:#dbeafe;color:#1e40af}
-.resolvido{background:#dcfce7;color:#166534}
-.acoes button{margin-right:6px;padding:6px 10px;border:none;border-radius:6px;cursor:pointer;font-size:12px}
-.btn-ver{background:#f1f5f9}
-.btn-del{background:#fee2e2;color:#b91c1c}
 </style>
 </head>
 <body>
-
-<!-- TELA DE LOGIN -->
-<div id="login-screen">
-  <form id="loginForm" class="login-box">
-    <h2>Admin Delipack</h2>
-    <p>Acesse o painel da ouvidoria</p>
-    <input type="text" id="username" placeholder="Usuário" value="admin" required>
-    <input type="password" id="password" placeholder="Senha" required>
-    <button type="submit">Entrar</button>
-    <p style="margin-top:12px;font-size:11px;color:#94a3b8;text-align:center">Padrão: admin / delipack123</p>
-  </form>
-</div>
-
-<!-- PAINEL ADMIN -->
-<div id="admin-panel">
-  <div class="header">
-    <h1>📋 Denúncias Recebidas</h1>
-    <button class="btn-sair" onclick="sair()">Sair</button>
-  </div>
-  <div class="card">
-    <table>
-      <thead>
-        <tr><th>Data</th><th>Tipo</th><th>Setor</th><th>Descrição</th><th>Status</th><th>Ações</th></tr>
-      </thead>
-      <tbody id="lista"><tr><td colspan="6" style="text-align:center;padding:30px">Carregando...</td></tr></tbody>
-    </table>
-  </div>
+<div class="header"><h1>📋 Denúncias - Delipack</h1><span style="color:#22c55e">● Online via Supabase</span></div>
+<div class="card">
+<table>
+<thead><tr><th>Data</th><th>Tipo</th><th>Setor</th><th>Descrição</th><th>Status</th></tr></thead>
+<tbody id="lista"><tr><td colspan="5" style="text-align:center;padding:30px">Carregando...</td></tr></tbody>
+</table>
 </div>
 
 <script>
-const API_URL = ''; // vazio usa o mesmo dominio
-
-// LOGIN - CORRIGIDO COM preventDefault
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const btn = e.target.querySelector('button');
-  btn.innerText = 'Entrando...';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      localStorage.setItem('admin_logado', 'true');
-      mostrarPainel();
-    } else {
-      alert('Usuário ou senha incorretos!');
-    }
-  } catch (err) {
-    alert('Erro ao conectar. Verifique se o servidor está no ar.');
-  } finally {
-    btn.innerText = 'Entrar';
-    btn.disabled = false;
-  }
-});
-
-function mostrarPainel(){
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('admin-panel').style.display = 'block';
-  carregarDenuncias();
-}
-
-function sair(){
-  localStorage.removeItem('admin_logado');
-  location.reload();
-}
-
-async function carregarDenuncias(){
+async function carregar(){
   try{
+    const res = await fetch('/api/denuncias');
+    const dados = await res.json();
+    const tbody = document.getElementById('lista');
+    if(!dados || dados.length===0){
+      tbody.innerHTML='<tr><td colspan="5" style="text-align:center">Nenhuma denúncia</td></tr>';return;
+    }
+    tbody.innerHTML=dados.map(d=>`
+      <tr>
+        <td>${new Date(d.created_at).toLocaleDateString('pt-BR')}</td>
+        <td>${d.tipo||'-'}</td>
+        <td>${d.setor||'-'}</td>
+        <td>${(d.descricao||'').substring(0,80)}...</td>
+        <td><span class="badge pendente">${d.status||'pendente'}</span></td>
+      </tr>
+    `).join('');
+  }catch(e){document.getElementById('lista').innerHTML='<tr><td colspan="5">Erro: '+e.message+'</td></tr>'}
+}
+carregar();
+</script>
+</body>
+</html>  try{
     const res = await fetch('/api/denuncias');
     const dados = await res.json();
     const tbody = document.getElementById('lista');
