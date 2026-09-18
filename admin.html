@@ -1,5 +1,6 @@
 <!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Admin Delipack</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>:root{--azul:#0B2A4A}*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter;background:#F2F5F8}
 header{background:linear-gradient(135deg,var(--azul),#123c6a);color:white;padding:14px 4%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
 #login{height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0B2A4A,#123c6a);padding:20px}
@@ -13,43 +14,55 @@ input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1.5px so
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);justify-content:center;align-items:center;z-index:99;padding:16px}.modal-box{background:white;padding:20px;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow:auto}
 @media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.table-wrap{display:none}.cards{display:grid}}
 </style></head><body>
-<div id="login"><div class="box"><h2 style="color:var(--azul)">Admin Delipack</h2><p style="font-size:12px;color:#666;margin:6px 0 12px">Login seguro via servidor</p><input id="email" placeholder="admin@delipack.com.br" value="admin@delipack.com.br"><input id="pass" type="password" placeholder="Senha"><button class="btn" onclick="logar()">Entrar</button><p id="erro" style="color:red;font-size:12px;margin-top:6px"></p></div></div>
-<div id="app" style="display:none"><header><b>DELIPACK • OUVIDORIA</b><div style="display:flex;gap:8px"><button onclick="sair()" style="padding:8px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.2);color:white;cursor:pointer">Sair</button></div></header><div class="container"><div class="kpis"><div class="card"><div style="font-size:10px">TOTAL</div><div class="kpi" id="kT">0</div></div><div class="card"><div style="font-size:10px">ANÔNIMOS</div><div class="kpi" id="kA">0</div></div><div class="card"><div style="font-size:10px">NOVOS</div><div class="kpi" id="kN">0</div></div><div class="card"><div style="font-size:10px">CONCLUÍDOS</div><div class="kpi" id="kC">0</div></div></div><div class="filters"><input id="busca" placeholder="🔍 Buscar..." oninput="render()"><select id="fTipo" onchange="render()"><option value="">Todos tipos</option><option>Denúncia</option><option>Reclamação</option><option>Assédio Moral / Sexual</option><option>Sugestão</option><option>Elogio</option><option>Dúvida</option></select></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Quem</th><th>Gravidade</th><th>Local</th><th>Relato</th><th>Ação</th></tr></thead><tbody id="tbody"></tbody></table></div><div class="cards" id="cards"></div></div></div>
+<div id="login"><div class="box"><h2 style="color:var(--azul)">Admin Delipack</h2><p style="font-size:12px;color:#666;margin:6px 0 12px">Login via Supabase</p><input id="email" placeholder="admin@delipack.com.br" value="admin@delipack.com.br"><input id="pass" type="password" placeholder="Senha"><button class="btn" id="btnEntrar" onclick="logar()">Entrar</button><p id="erro" style="color:red;font-size:12px;margin-top:8px"></p></div></div>
+<div id="app" style="display:none"><header><b>DELIPACK • OUVIDORIA</b><button onclick="sair()" style="padding:8px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.2);color:white;cursor:pointer">Sair</button></header><div class="container"><div class="kpis"><div class="card"><div style="font-size:10px">TOTAL</div><div class="kpi" id="kT">0</div></div><div class="card"><div style="font-size:10px">ANÔNIMOS</div><div class="kpi" id="kA">0</div></div><div class="card"><div style="font-size:10px">NOVOS</div><div class="kpi" id="kN">0</div></div><div class="card"><div style="font-size:10px">CONCLUÍDOS</div><div class="kpi" id="kC">0</div></div></div><div class="filters"><input id="busca" placeholder="🔍 Buscar..." oninput="render()"><select id="fTipo" onchange="render()"><option value="">Todos tipos</option><option>Denúncia</option><option>Reclamação</option><option>Assédio Moral / Sexual</option><option>Sugestão</option><option>Elogio</option><option>Dúvida</option></select></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Quem</th><th>Gravidade</th><th>Local</th><th>Relato</th><th>Ação</th></tr></thead><tbody id="tbody"></tbody></table></div><div class="cards" id="cards"></div></div></div>
 <div class="modal" id="modal"><div class="modal-box"><h3 style="color:var(--azul)">Responder / Ação</h3><div id="mInfo" style="background:#f9fafb;padding:10px;border-radius:10px;font-size:13px;margin:10px 0"></div><label style="font-size:11px;font-weight:800">Ação tomada</label><textarea id="acao" rows="3"></textarea><label style="font-size:11px;font-weight:800">Parecer</label><textarea id="parecer" rows="2"></textarea><label style="font-size:11px;font-weight:800">Status</label><select id="st"><option>Novo</option><option>Em Análise</option><option>Respondido</option><option>Concluído</option><option>Arquivado</option></select><button class="btn" style="margin-top:10px" onclick="salvar()">Salvar</button><button onclick="modal.style.display='none'" style="margin-top:8px;width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;background:white">Cancelar</button></div></div>
 <script>
-let lista=[], idAt=null, token=localStorage.getItem('delipack_token');
+// COLOQUE AQUI SUA URL E ANON KEY DO SUPABASE (pode pegar no painel do Supabase)
+const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
+const SUPABASE_ANON = 'SUA_ANON_KEY_AQUI';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let lista=[], idAt=null;
+
 async function logar(){
- const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email.value,password:pass.value})});
- const j=await r.json(); if(!r.ok){ erro.textContent=j.error; return; }
- token=j.token; localStorage.setItem('delipack_token',token); mostrar();
+  const btn=document.getElementById('btnEntrar');
+  const erroEl=document.getElementById('erro');
+  erroEl.textContent='Entrando...';
+  btn.disabled=true;
+  btn.textContent='Carregando...';
+  try{
+    const {data, error} = await supabase.auth.signInWithPassword({email:email.value.trim(), password:pass.value});
+    if(error){ erroEl.textContent=error.message; return; }
+    localStorage.setItem('delipack_session', JSON.stringify(data.session));
+    mostrar();
+  }catch(e){ erroEl.textContent='Erro: '+e.message; }
+  finally{ btn.disabled=false; btn.textContent='Entrar'; }
 }
 function mostrar(){ login.style.display='none'; app.style.display='block'; carregar(); }
 async function carregar(){
- const r=await fetch('/api/relatos',{headers:{Authorization:'Bearer '+token}});
- if(!r.ok){ localStorage.removeItem('delipack_token'); location.reload(); return; }
- lista=await r.json(); render();
+  const {data, error} = await supabase.from('denuncias').select('*').order('created_at',{ascending:false});
+  if(error){ alert(error.message); return; }
+  lista=data.map(r=>({ ...r, data_br:new Date(r.created_at).toLocaleDateString('pt-BR'), nome:r.nome||'Anônimo', anonimo:!r.nome, gravidade:r.gravidade||'Média', local:r.local||r.setor||'-', descricao:r.descricao||r.mensagem||'', status:r.status||'Novo' }));
+  render();
 }
 function render(){
- let l=[...lista]; let q=busca.value.toLowerCase(), ft=fTipo.value;
- if(q) l=l.filter(x=>JSON.stringify(x).toLowerCase().includes(q)); if(ft) l=l.filter(x=>x.tipo==ft);
- kT.textContent=lista.length; kA.textContent=lista.filter(x=>x.anonimo).length; kN.textContent=lista.filter(x=>x.status=='Novo').length; kC.textContent=lista.filter(x=>['Respondido','Concluído'].includes(x.status)).length;
- tbody.innerHTML=''; cards.innerHTML='';
- l.forEach(r=>{
-  tbody.innerHTML+=`<tr><td>${r.data_br}</td><td><b>${r.tipo}</b></td><td>${r.anonimo?'🕵️ Anônimo':r.nome}<br><small>${r.setor}</small></td><td>${r.gravidade}</td><td>${r.local||'-'}</td><td style="max-width:200px">${r.descricao.slice(0,80)}... ${r.resposta_admin?'<br><span style="color:green">✅ Respondido</span>':''}</td><td><button class="btn-r" onclick="abrir('${r.id}')">Responder</button></td></tr>`;
-  cards.innerHTML+=`<div class="card-relato"><div style="display:flex;justify-content:space-between;font-size:12px"><b>${r.tipo}</b><span>${r.status}</span></div><div style="font-size:12px;margin:6px 0">👤 ${r.anonimo?'Anônimo':r.nome} • ⚠️ ${r.gravidade}</div><div style="background:#f9fafb;padding:8px;border-radius:8px;font-size:13px;margin:6px 0">${r.descricao.slice(0,120)}...</div><button class="btn-r" style="width:100%" onclick="abrir('${r.id}')">Responder</button></div>`;
- });
+  let l=[...lista]; let q=busca.value.toLowerCase(), ft=fTipo.value;
+  if(q) l=l.filter(x=>JSON.stringify(x).toLowerCase().includes(q)); if(ft) l=l.filter(x=>x.tipo==ft);
+  kT.textContent=lista.length; kA.textContent=lista.filter(x=>x.anonimo).length; kN.textContent=lista.filter(x=>x.status=='Novo').length; kC.textContent=lista.filter(x=>['Respondido','Concluído'].includes(x.status)).length;
+  tbody.innerHTML=''; cards.innerHTML='';
+  l.forEach(r=>{
+    tbody.innerHTML+=`<tr><td>${r.data_br}</td><td><b>${r.tipo}</b></td><td>${r.anonimo?'🕵️ Anônimo':r.nome}<br><small>${r.setor||''}</small></td><td>${r.gravidade}</td><td>${r.local}</td><td style="max-width:200px">${r.descricao.slice(0,80)}...</td><td><button class="btn-r" onclick="abrir('${r.id}')">Responder</button></td></tr>`;
+    cards.innerHTML+=`<div class="card-relato"><div style="display:flex;justify-content:space-between;font-size:12px"><b>${r.tipo}</b><span>${r.status}</span></div><div style="font-size:12px;margin:6px 0">👤 ${r.anonimo?'Anônimo':r.nome} • ⚠️ ${r.gravidade}</div><div style="background:#f9fafb;padding:8px;border-radius:8px;font-size:13px;margin:6px 0">${r.descricao.slice(0,120)}...</div><button class="btn-r" style="width:100%" onclick="abrir('${r.id}')">Responder</button></div>`;
+  });
 }
-function abrir(id){ idAt=id; let r=lista.find(x=>x.id==id); mInfo.innerHTML=`<b>${r.tipo} - ${r.data_br}</b><br>${r.nome} - ${r.setor}<br><br>${r.descricao}`; acao.value=r.acao_tomada||''; parecer.value=r.resposta_admin||''; st.value=r.status; modal.style.display='flex'; }
+function abrir(id){ idAt=id; let r=lista.find(x=>x.id==id); mInfo.innerHTML=`<b>${r.tipo} - ${r.data_br}</b><br>${r.nome} - ${r.setor||''}<br><br>${r.descricao}`; acao.value=r.acao_tomada||''; parecer.value=r.resposta_admin||''; st.value=r.status; modal.style.display='flex'; }
 async function salvar(){
- const r=await fetch('/api/relatos/'+idAt,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({acao_tomada:acao.value,resposta_admin:parecer.value,status:st.value,data_resposta:new Date().toLocaleString('pt-BR')})});
- if(!r.ok){ alert('Erro ao salvar'); return; } modal.style.display='none'; carregar();
+  const {error}=await supabase.from('denuncias').update({acao_tomada:acao.value,resposta_admin:parecer.value,status:st.value,data_resposta:new Date().toLocaleString('pt-BR')}).eq('id',idAt);
+  if(error){ alert('Erro: '+error.message); return; } modal.style.display='none'; carregar();
 }
-function sair(){ localStorage.removeItem('delipack_token'); location.reload(); }
-if(token) mostrar();
+function sair(){ supabase.auth.signOut(); localStorage.removeItem('delipack_session'); location.reload(); }
+
+// se já logado
+supabase.auth.getSession().then(({data})=>{ if(data.session) mostrar(); });
 </script></body></html>
-  cards.innerHTML+=`
-  <div class="card-relato">
-    <div class="linha"><span><b>${r.tipo}</b> • ${r.dataBR}</span><span class="badge ${r.status}">${r.status}</span></div>
-    <div class="linha"><span>👤 ${r.anonimo?'🕵️ Anônimo':r.nome}</span><span>📍 ${r.local||'-'}</span></div>
-    <div class="linha"><span>⚠️ ${r.gravidade}</span><span>${r.setor}</span></div>
-    <div class="desc">${r.descricao}<br>${r.respostaAdmin?`<small style="color:green"><b>Ação:</b> ${r.acao
