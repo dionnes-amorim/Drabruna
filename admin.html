@@ -1,55 +1,154 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin Delipack</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<style>:root{--azul:#0B2A4A}*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter;background:#F2F5F8}
-header{background:linear-gradient(135deg,var(--azul),#123c6a);color:white;padding:14px 4%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
-#login{height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0B2A4A,#123c6a);padding:20px}
-.box{background:white;padding:28px;border-radius:18px;width:100%;max-width:380px}
-input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1.5px solid #ddd;margin:6px 0}
-.btn{background:var(--azul);color:white;padding:12px;border:none;border-radius:10px;width:100%;font-weight:700;cursor:pointer}
-.container{padding:16px 3%}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.card{background:white;border-radius:16px;padding:14px;box-shadow:0 6px 18px rgba(0,0,0,.05)}.kpi{font-size:24px;font-weight:800;color:var(--azul)}
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.filters input{flex:1;min-width:200px}.table-wrap{background:white;border-radius:16px;overflow:auto;box-shadow:0 6px 18px rgba(0,0,0,.05)}table{width:100%;border-collapse:collapse;font-size:13px;min-width:800px}th,td{padding:12px;border-bottom:1px solid #eee;text-align:left}th{background:var(--azul);color:white;font-size:11px;text-transform:uppercase}
-.cards{display:none;gap:12px}.card-relato{background:white;border-radius:16px;padding:14px;border-left:5px solid var(--azul);box-shadow:0 4px 12px rgba(0,0,0,.05)}
-.btn-r{padding:8px 14px;border-radius:20px;border:none;background:var(--azul);color:white;font-weight:700;cursor:pointer;font-size:12px}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);justify-content:center;align-items:center;z-index:99;padding:16px}.modal-box{background:white;padding:20px;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow:auto}
-@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.table-wrap{display:none}.cards{display:grid}}
-</style></head><body>
-<div id="login"><div class="box"><h2 style="color:var(--azul)">Admin Delipack</h2><p style="font-size:12px;color:#666;margin:6px 0 12px">Login seguro via servidor</p><input id="email" placeholder="admin@delipack.com.br" value="admin@delipack.com.br"><input id="pass" type="password" placeholder="Senha"><button class="btn" onclick="logar()">Entrar</button><p id="erro" style="color:red;font-size:12px;margin-top:6px"></p></div></div>
-<div id="app" style="display:none"><header><b>DELIPACK • OUVIDORIA</b><div style="display:flex;gap:8px"><button onclick="sair()" style="padding:8px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.2);color:white;cursor:pointer">Sair</button></div></header><div class="container"><div class="kpis"><div class="card"><div style="font-size:10px">TOTAL</div><div class="kpi" id="kT">0</div></div><div class="card"><div style="font-size:10px">ANÔNIMOS</div><div class="kpi" id="kA">0</div></div><div class="card"><div style="font-size:10px">NOVOS</div><div class="kpi" id="kN">0</div></div><div class="card"><div style="font-size:10px">CONCLUÍDOS</div><div class="kpi" id="kC">0</div></div></div><div class="filters"><input id="busca" placeholder="🔍 Buscar..." oninput="render()"><select id="fTipo" onchange="render()"><option value="">Todos tipos</option><option>Denúncia</option><option>Reclamação</option><option>Assédio Moral / Sexual</option><option>Sugestão</option><option>Elogio</option><option>Dúvida</option></select></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Quem</th><th>Gravidade</th><th>Local</th><th>Relato</th><th>Ação</th></tr></thead><tbody id="tbody"></tbody></table></div><div class="cards" id="cards"></div></div></div>
-<div class="modal" id="modal"><div class="modal-box"><h3 style="color:var(--azul)">Responder / Ação</h3><div id="mInfo" style="background:#f9fafb;padding:10px;border-radius:10px;font-size:13px;margin:10px 0"></div><label style="font-size:11px;font-weight:800">Ação tomada</label><textarea id="acao" rows="3"></textarea><label style="font-size:11px;font-weight:800">Parecer</label><textarea id="parecer" rows="2"></textarea><label style="font-size:11px;font-weight:800">Status</label><select id="st"><option>Novo</option><option>Em Análise</option><option>Respondido</option><option>Concluído</option><option>Arquivado</option></select><button class="btn" style="margin-top:10px" onclick="salvar()">Salvar</button><button onclick="modal.style.display='none'" style="margin-top:8px;width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;background:white">Cancelar</button></div></div>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Ouvidoria Delipack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}
+body{background:#f4f5f7;min-height:100vh}
+#login-screen{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#0f172a}
+.login-box{background:white;padding:40px;border-radius:16px;width:100%;max-width:380px;box-shadow:0 20px 40px rgba(0,0,0,0.2)}
+.login-box h2{margin-bottom:8px;color:#0f172a}
+.login-box p{margin-bottom:24px;color:#64748b;font-size:14px}
+.login-box input{width:100%;padding:12px 14px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:12px;font-size:15px}
+.login-box button{width:100%;padding:12px;background:#0f172a;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:15px}
+.login-box button:hover{background:#1e293b}
+.login-box button:disabled{opacity:0.6}
+#admin-panel{display:none;padding:24px;max-width:1200px;margin:0 auto}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;background:white;padding:16px 20px;border-radius:12px}
+.header h1{font-size:20px}
+.btn-sair{padding:8px 16px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer}
+.card{background:white;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);overflow:auto}
+table{width:100%;border-collapse:collapse}
+th{ text-align:left;padding:12px;border-bottom:2px solid #f1f5f9;color:#64748b;font-size:12px;text-transform:uppercase}
+td{padding:12px;border-bottom:1px solid #f1f5f9;font-size:14px}
+.badge{padding:4px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.pendente{background:#fef3c7;color:#92400e}
+.analise{background:#dbeafe;color:#1e40af}
+.resolvido{background:#dcfce7;color:#166534}
+.acoes button{margin-right:6px;padding:6px 10px;border:none;border-radius:6px;cursor:pointer;font-size:12px}
+.btn-ver{background:#f1f5f9}
+.btn-del{background:#fee2e2;color:#b91c1c}
+</style>
+</head>
+<body>
+
+<!-- TELA DE LOGIN -->
+<div id="login-screen">
+  <form id="loginForm" class="login-box">
+    <h2>Admin Delipack</h2>
+    <p>Acesse o painel da ouvidoria</p>
+    <input type="text" id="username" placeholder="Usuário" value="admin" required>
+    <input type="password" id="password" placeholder="Senha" required>
+    <button type="submit">Entrar</button>
+    <p style="margin-top:12px;font-size:11px;color:#94a3b8;text-align:center">Padrão: admin / delipack123</p>
+  </form>
+</div>
+
+<!-- PAINEL ADMIN -->
+<div id="admin-panel">
+  <div class="header">
+    <h1>📋 Denúncias Recebidas</h1>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Data</th><th>Tipo</th><th>Setor</th><th>Descrição</th><th>Status</th><th>Ações</th></tr>
+      </thead>
+      <tbody id="lista"><tr><td colspan="6" style="text-align:center;padding:30px">Carregando...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
 <script>
-let lista=[], idAt=null, token=localStorage.getItem('delipack_token');
-async function logar(){
- const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email.value,password:pass.value})});
- const j=await r.json(); if(!r.ok){ erro.textContent=j.error; return; }
- token=j.token; localStorage.setItem('delipack_token',token); mostrar();
+const API_URL = ''; // vazio usa o mesmo dominio
+
+// LOGIN - CORRIGIDO COM preventDefault
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const btn = e.target.querySelector('button');
+  btn.innerText = 'Entrando...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      localStorage.setItem('admin_logado', 'true');
+      mostrarPainel();
+    } else {
+      alert('Usuário ou senha incorretos!');
+    }
+  } catch (err) {
+    alert('Erro ao conectar. Verifique se o servidor está no ar.');
+  } finally {
+    btn.innerText = 'Entrar';
+    btn.disabled = false;
+  }
+});
+
+function mostrarPainel(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  carregarDenuncias();
 }
-function mostrar(){ login.style.display='none'; app.style.display='block'; carregar(); }
-async function carregar(){
- const r=await fetch('/api/relatos',{headers:{Authorization:'Bearer '+token}});
- if(!r.ok){ localStorage.removeItem('delipack_token'); location.reload(); return; }
- lista=await r.json(); render();
+
+function sair(){
+  localStorage.removeItem('admin_logado');
+  location.reload();
 }
-function render(){
- let l=[...lista]; let q=busca.value.toLowerCase(), ft=fTipo.value;
- if(q) l=l.filter(x=>JSON.stringify(x).toLowerCase().includes(q)); if(ft) l=l.filter(x=>x.tipo==ft);
- kT.textContent=lista.length; kA.textContent=lista.filter(x=>x.anonimo).length; kN.textContent=lista.filter(x=>x.status=='Novo').length; kC.textContent=lista.filter(x=>['Respondido','Concluído'].includes(x.status)).length;
- tbody.innerHTML=''; cards.innerHTML='';
- l.forEach(r=>{
-  tbody.innerHTML+=`<tr><td>${r.data_br}</td><td><b>${r.tipo}</b></td><td>${r.anonimo?'🕵️ Anônimo':r.nome}<br><small>${r.setor}</small></td><td>${r.gravidade}</td><td>${r.local||'-'}</td><td style="max-width:200px">${r.descricao.slice(0,80)}... ${r.resposta_admin?'<br><span style="color:green">✅ Respondido</span>':''}</td><td><button class="btn-r" onclick="abrir('${r.id}')">Responder</button></td></tr>`;
-  cards.innerHTML+=`<div class="card-relato"><div style="display:flex;justify-content:space-between;font-size:12px"><b>${r.tipo}</b><span>${r.status}</span></div><div style="font-size:12px;margin:6px 0">👤 ${r.anonimo?'Anônimo':r.nome} • ⚠️ ${r.gravidade}</div><div style="background:#f9fafb;padding:8px;border-radius:8px;font-size:13px;margin:6px 0">${r.descricao.slice(0,120)}...</div><button class="btn-r" style="width:100%" onclick="abrir('${r.id}')">Responder</button></div>`;
- });
+
+async function carregarDenuncias(){
+  try{
+    const res = await fetch('/api/denuncias');
+    const dados = await res.json();
+    const tbody = document.getElementById('lista');
+    if(!dados || dados.length === 0){
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px">Nenhuma denúncia ainda</td></tr>';
+      return;
+    }
+    tbody.innerHTML = dados.map(d => `
+      <tr>
+        <td>${new Date(d.created_at).toLocaleDateString('pt-BR')}</td>
+        <td>${d.tipo || '-'}</td>
+        <td>${d.setor || '-'}</td>
+        <td title="${d.descricao}">${(d.descricao||'').substring(0,60)}...</td>
+        <td><span class="badge ${d.status||'pendente'}">${d.status||'pendente'}</span></td>
+        <td class="acoes">
+          <button class="btn-ver" onclick="verDetalhe('${d.id}')">Ver</button>
+          <button class="btn-del" onclick="deletar('${d.id}')">Excluir</button>
+        </td>
+      </tr>
+    `).join('');
+  }catch(e){
+    document.getElementById('lista').innerHTML = '<tr><td colspan="6">Erro ao carregar</td></tr>';
+  }
 }
-function abrir(id){ idAt=id; let r=lista.find(x=>x.id==id); mInfo.innerHTML=`<b>${r.tipo} - ${r.data_br}</b><br>${r.nome} - ${r.setor}<br><br>${r.descricao}`; acao.value=r.acao_tomada||''; parecer.value=r.resposta_admin||''; st.value=r.status; modal.style.display='flex'; }
-async function salvar(){
- const r=await fetch('/api/relatos/'+idAt,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({acao_tomada:acao.value,resposta_admin:parecer.value,status:st.value,data_resposta:new Date().toLocaleString('pt-BR')})});
- if(!r.ok){ alert('Erro ao salvar'); return; } modal.style.display='none'; carregar();
+
+async function verDetalhe(id){
+  const res = await fetch(`/api/denuncias/${id}`);
+  const d = await res.json();
+  alert(`DETALHE COMPLETO:\n\nTipo: ${d.tipo}\nSetor: ${d.setor}\nStatus: ${d.status}\n\nDescrição:\n${d.descricao}\n\nData: ${new Date(d.created_at).toLocaleString()}`);
 }
-function sair(){ localStorage.removeItem('delipack_token'); location.reload(); }
-if(token) mostrar();
-</script></body></html>
-  cards.innerHTML+=`
-  <div class="card-relato">
-    <div class="linha"><span><b>${r.tipo}</b> • ${r.dataBR}</span><span class="badge ${r.status}">${r.status}</span></div>
-    <div class="linha"><span>👤 ${r.anonimo?'🕵️ Anônimo':r.nome}</span><span>📍 ${r.local||'-'}</span></div>
-    <div class="linha"><span>⚠️ ${r.gravidade}</span><span>${r.setor}</span></div>
-    <div class="desc">${r.descricao}<br>${r.respostaAdmin?`<small style="color:green"><b>Ação:</b> ${r.acao
+
+async function deletar(id){
+  if(!confirm('Excluir essa denúncia?')) return;
+  await fetch(`/api/denuncias/${id}`, { method: 'DELETE' });
+  carregarDenuncias();
+}
+
+// Se já logado, entra direto
+if(localStorage.getItem('admin_logado') === 'true'){
+  mostrarPainel();
+}
+</script>
+</body>
+</html>
