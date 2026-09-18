@@ -1,63 +1,51 @@
-import express from 'express';
-import cors from 'cors';
-import { createClient } from '@supabase/supabase-js';
-import path from 'path';
-import { fileURLToPath } from 'url';
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// PEGA DO RENDER ENV - NUNCA VAI PRO CÓDIGO FONTE DO NAVEGADOR
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-// FUNCIONÁRIO ENVIA - sem precisar de login
-app.post('/api/relatos', async (req, res) => {
-  const { data, error } = await supabase.from('relatos').insert([req.body]);
-  if(error) return res.status(400).json({ error: error.message });
-  res.json({ ok: true });
+// LOGIN - CORRIGIDO
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  console.log('Tentativa login:', username);
+  // Aceita admin / delipack123
+  if (username === 'admin' && password === 'delipack123') {
+    return res.json({ success: true });
+  }
+  return res.status(401).json({ success: false, message: 'Usuario ou senha incorretos!' });
 });
 
-// ADMIN LOGIN - valida no Supabase
-app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if(error) return res.status(401).json({ error: error.message });
-  res.json({ token: data.session.access_token, user: data.user });
-});
-
-// ADMIN LISTA - precisa do token
-app.get('/api/relatos', async (req, res) => {
-  const token = req.headers.authorization?.replace('Bearer ','');
-  if(!token) return res.status(401).json({error:'Não autorizado'});
-  
-  const { data: { user } } = await supabase.auth.getUser(token);
-  if(!user) return res.status(401).json({error:'Sessão inválida'});
-
-  const { data, error } = await supabase.from('relatos').select('*').order('created_at', {ascending:false});
-  if(error) return res.status(400).json({error:error.message});
+// LISTAR DENUNCIAS
+app.get('/api/denuncias', async (req, res) => {
+  const { data, error } = await supabase.from('denuncias').select('*').order('created_at', { ascending: false });
+  if (error) return res.status(500).json(error);
   res.json(data);
 });
 
-// ADMIN RESPONDE
-app.put('/api/relatos/:id', async (req, res) => {
-  const token = req.headers.authorization?.replace('Bearer ','');
-  const { data: { user } } = await supabase.auth.getUser(token);
-  if(!user) return res.status(401).json({error:'Não autorizado'});
-
-  const { error } = await supabase.from('relatos').update(req.body).eq('id', req.params.id);
-  if(error) return res.status(400).json({error:error.message});
-  res.json({ok:true});
+// VER UMA DENUNCIA
+app.get('/api/denuncias/:id', async (req, res) => {
+  const { data } = await supabase.from('denuncias').select('*').eq('id', req.params.id).single();
+  res.json(data);
 });
 
-app.get('/', (req,res)=> res.sendFile(path.join(__dirname,'index.html')));
-app.get('/admin', (req,res)=> res.sendFile(path.join(__dirname,'admin.html')));
+// CRIAR DENUNCIA
+app.post('/api/denuncias', async (req, res) => {
+  const { data, error } = await supabase.from('denuncias').insert([req.body]).select();
+  if (error) return res.status(500).json(error);
+  res.json(data);
+});
+
+// DELETAR
+app.delete('/api/denuncias/:id', async (req, res) => {
+  await supabase.from('denuncias').delete().eq('id', req.params.id);
+  res.json({ success: true });
+});
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, ()=> console.log('Rodando na porta '+PORT));
+app.listen(PORT, () => console.log('Rodando na porta ' + PORT));
