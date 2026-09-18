@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Ouvidoria - Delipack</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--azul:#0B2A4A} *{margin:0;padding:0;box-sizing:border-box} body{font-family:Inter;background:#F5F7FA}
+header{background:var(--azul);color:white;padding:14px 3%;display:flex;justify-content:space-between;align-items:center}
+#login{height:100vh;display:flex;justify-content:center;align-items:center}.box{background:white;padding:32px;border-radius:16px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.1)}
+input,select{width:100%;padding:11px;border-radius:10px;border:1px solid #ddd;margin:6px 0}
+.btn{background:var(--azul);color:white;padding:12px;border:none;border-radius:10px;width:100%;font-weight:700;cursor:pointer}
+#app{display:none}.dash{display:grid;grid-template-columns:220px 1fr 300px;gap:16px;padding:16px 2%}
+.card{background:white;border-radius:14px;padding:16px;box-shadow:0 4px 18px rgba(0,0,0,.04)}
+.kpi{font-size:28px;font-weight:800;color:var(--azul)}
+table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:10px;border-bottom:1px solid #eee;text-align:left} th{background:var(--azul);color:white;font-size:11px;letter-spacing:.5px}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}.Novo{background:#FFF4CC}.Em.Análise{background:#D6E8FF}.Respondido{background:#D1FAE5}.Concluído{background:#c8f7c5}.Arquivado{background:#eee}
+.filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.filtros select,.filtros input{width:auto;min-width:140px}
+@media(max-width:1100px){.dash{grid-template-columns:1fr}}
+</style>
+</head><body>
+
+<div id="login">
+<div class="box"><h2 style="color:var(--azul)">Acesso Restrito</h2><p style="font-size:12px;color:#666;margin:6px 0 14px">Ouvidoria Delipack - Comitê</p>
+<input id="u" placeholder="Usuário (admin)"><input id="p" type="password" placeholder="Senha (delipack2026)"><button class="btn" onclick="logar()">Entrar</button><p id="erro" style="color:red;font-size:12px;margin-top:8px"></p>
+<p style="font-size:10px;color:#999;margin-top:10px">Protegido por LGPD - acesso logado e auditado</p></div>
+</div>
+
+<div id="app">
+<header><b>DELIPACK • OUVIDORIA - ADMIN</b><div><button onclick="exportar()" style="padding:8px 14px;border-radius:8px;border:none;background:white;color:var(--azul);font-weight:700;cursor:pointer">Exportar Excel</button> <button onclick="sair()" style="padding:8px 14px;border-radius:8px;border:none;background:#ffffff22;color:white;cursor:pointer">Sair</button></div></header>
+
+<div class="dash">
+<div><div class="card"><div style="font-size:12px;color:#666">Total</div><div class="kpi" id="kpiTotal">0</div></div><div class="card" style="margin-top:12px"><div style="font-size:12px;color:#666">Anônimos</div><div class="kpi" id="kpiAnon">0</div></div><div class="card" style="margin-top:12px"><canvas id="chartTipo" height="200"></canvas></div></div>
+
+<div class="card">
+<div class="filtros"><input id="busca" placeholder="Buscar por protocolo, nome, tipo..." oninput="render()"><select id="fStatus" onchange="render()"><option value="">Todos status</option><option>Novo</option><option>Em Análise</option><option>Respondido</option><option>Concluído</option><option>Arquivado</option></select><select id="fTipo" onchange="render()"><option value="">Todos tipos</option><option>Denúncia</option><option>Reclamação</option><option>Sugestão</option><option>Elogio</option><option>Dúvida</option><option>Assédio Moral / Sexual</option></select></div>
+<table><thead><tr><th>Data/Hora</th><th>Protocolo</th><th>Tipo</th><th>Anon?</th><th>Identificação</th><th>Gravidade</th><th>Status</th><th>Ação</th></tr></thead><tbody id="tbody"></tbody></table>
+</div>
+
+<div class="card"><h3 style="color:var(--azul);font-size:14px">Detalhes do relato</h3><div id="detalhe" style="font-size:13px;line-height:1.6;margin-top:10px;color:#333">Clique em um relato para ver</div><div id="acoes" style="margin-top:12px"></div></div>
+</div>
+</div>
+
+<script>
+const KEY='delipack_ouv'; const get=()=>JSON.parse(localStorage.getItem(KEY)||'[]'), save=a=>localStorage.setItem(KEY,JSON.stringify(a));
+function logar(){ if(u.value.toLowerCase()=='admin' && p.value=='delipack2026'){ localStorage.setItem('delipack_login','ok'); mostrar(); } else erro.textContent='Login inválido'; }
+function mostrar(){ login.style.display='none'; app.style.display='block'; render(); montarGrafico(); }
+function sair(){ localStorage.removeItem('delipack_login'); location.reload(); }
+function render(){
+ let lista=get().sort((a,b)=> new Date(b.dataHora)-new Date(a.dataHora));
+ let q=busca.value.toLowerCase(), fs=fStatus.value, ft=fTipo.value;
+ lista=lista.filter(x=> (!q || JSON.stringify(x).toLowerCase().includes(q)) && (!fs || x.status==fs) && (!ft || x.tipo==ft) );
+ kpiTotal.textContent=get().length; kpiAnon.textContent=get().filter(x=>x.anonimo).length;
+ tbody.innerHTML=''; lista.forEach((r,i)=>{
+  tbody.innerHTML+=`<tr style="cursor:pointer" onclick="ver('${r.id}')"><td>${r.dataBR}</td><td><b>${r.id}</b></td><td>${r.tipo}</td><td>${r.anonimo?'🕵️ Sim':'🙋 Não'}</td><td>${r.nome}<br><small style="color:#777">${r.setor}</small></td><td>${r.gravidade}</td><td><span class="badge ${r.status}">${r.status}</span></td><td><button onclick="event.stopPropagation(); mudarStatus('${r.id}')">Mudar status</button></td></tr>`;
+ });
+}
+function ver(id){ let r=get().find(x=>x.id==id); detalhe.innerHTML=`<b>Protocolo:</b> ${r.id}<br><b>Data/Hora:</b> ${r.dataBR}<br><b>Tipo:</b> ${r.tipo}<br><b>Gravidade:</b> ${r.gravidade}<br><b>Anônimo:</b> ${r.anonimo?'SIM - identidade protegida por LGPD':'NÃO'}<br><b>Nome:</b> ${r.nome}<br><b>CPF:</b> ${r.cpf||'-'}<br><b>Setor:</b> ${r.setor}<br><b>Contato:</b> ${r.contato}<br><b>Data ocorrido:</b> ${r.dataOcorrido||'-'}<br><b>Anexo:</b> ${r.anexo}<br><hr style="margin:10px 0"><b>Descrição:</b><br>${r.descricao}`; acoes.innerHTML=`<select id="selStatus"><option>Novo</option><option>Em Análise</option><option>Respondido</option><option>Concluído</option><option>Arquivado</option></select><button class="btn" style="margin-top:8px" onclick="salvarStatus('${r.id}')">Salvar status</button><br><br><button onclick="copiar('${r.id}')" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:white;cursor:pointer">Copiar relato</button>`; document.getElementById('selStatus').value=r.status; }
+function mudarStatus(id){ let r=get().find(x=>x.id==id); let novo=prompt(`Mudar status de ${id} - digite: Novo, Em Análise, Respondido, Concluído, Arquivado`, r.status); if(novo){ let lista=get(); let idx=lista.findIndex(x=>x.id==id); lista[idx].status=novo; save(lista); render(); } }
+function salvarStatus(id){ let lista=get(); let idx=lista.findIndex(x=>x.id==id); lista[idx].status=document.getElementById('selStatus').value; save(lista); render(); alert('Status atualizado'); }
+function exportar(){ let blob=new Blob([JSON.stringify(get(),null,2)],{type:'application/json'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ouvidoria_delipack.json'; a.click(); }
+function copiar(id){ let r=get().find(x=>x.id==id); navigator.clipboard.writeText(JSON.stringify(r,null,2)); alert('Copiado'); }
+function montarGrafico(){
+ let lista=get(); let tipos={}; lista.forEach(r=> tipos[r.tipo]=(tipos[r.tipo]||0)+1);
+ new Chart(document.getElementById('chartTipo'), {type:'doughnut', data:{labels:Object.keys(tipos), datasets:[{data:Object.values(tipos), backgroundColor:['#0B2A4A','#00C896','#F59E0B','#EF4444','#8B5CF6','#06B6D4']}]}, options:{plugins:{title:{display:true,text:'Por tipo de manifestação'}}}});
+}
+if(localStorage.getItem('delipack_login')=='ok') mostrar();
+</script>
+</body></html>
