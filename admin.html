@@ -6,14 +6,15 @@
 <link rel="apple-touch-icon" href="logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--azul:#0B2A4A;--verde:#00C896} *{margin:0;padding:0;box-sizing:border-box} body{font-family:Inter;background:#F2F5F8}
+:root{--azul:#0B2A4A;--verde:#00C896} *{margin:0;padding:0;box-sizing:border-box} body{font-family:Inter,sans-serif;background:#F2F5F8}
+img{max-width:100%}
 header{background:linear-gradient(135deg,var(--azul),#123c6a);color:white;padding:10px 4%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;width:100%;flex-wrap:wrap;gap:10px}
 header.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px}
-header.brand img{height:36px;background:white;border-radius:8px;padding:4px 8px}
+header.brand img{height:36px;background:white;border-radius:8px;padding:4px 8px;object-fit:contain;width:auto}
 #login{height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0B2A4A,#123c6a);padding:20px}
 .box{background:white;padding:28px;border-radius:18px;width:100%;max-width:360px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
 .box.logo-login{display:flex;justify-content:center;margin-bottom:14px}
-.box.logo-login img{height:48px}
+.box.logo-login img{height:48px;max-width:160px;object-fit:contain;width:auto;display:block}
 input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1.5px solid #ddd;margin:6px 0;outline:none;font-size:14px}
 .btn{background:var(--azul);color:white;padding:13px;border:none;border-radius:10px;width:100%;font-weight:700;cursor:pointer}
 .container{padding:16px 3%}
@@ -108,6 +109,22 @@ function render(){
   cards.innerHTML += '<div class="card-relato"><div style="display:flex;justify-content:space-between;font-size:12px"><span><b>'+r.tipo+'</b> • '+(r.data_br||'')+'</span><span class="badge '+badge.split(' ')[0]+'">'+badge+'</span></div><div style="display:flex;justify-content:space-between;margin:6px 0;font-size:12px"><span>👤 '+(r.anonimo?'Anônimo':r.nome)+'</span><span>📍 '+(r.local||'-')+'</span></div><div style="font-size:12px">⚠️ '+(r.gravidade||'-')+' • '+(r.setor||'')+'</div><div style="background:#f9fafb;padding:10px;border-radius:10px;font-size:13px;margin:8px 0">'+(r.descricao||'')+'<br>'+acaoTxt+'</div><button class="btn-resp" style="width:100%" onclick="abrir(\''+r.id+'\')">Responder</button></div>';
  });
 }
+function abrir(id){ idAtivo=id; let r=lista.find(x=>x.id==id); document.getElementById('modalInfo').innerHTML='<b>'+r.tipo+' - '+(r.data_br||'')+'</b><br>'+(r.nome||'')+' - '+(r.setor||'')+'<br><br>'+(r.descricao||''); document.getElementById('acao').value=r.acao_tomada||''; document.getElementById('parecer').value=r.resposta_admin||''; document.getElementById('statusFinal').value=r.status||'Novo'; document.getElementById('modal').style.display='flex'; }
+function fechar(){ document.getElementById('modal').style.display='none'; }
+async function salvarResposta(){
+ const r=await fetch('/api/relatos/'+idAtivo,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({acao_tomada:document.getElementById('acao').value,resposta_admin:document.getElementById('parecer').value,status:document.getElementById('statusFinal').value,data_resposta:new Date().toLocaleString('pt-BR')})});
+ if(!r.ok){ alert('Erro ao salvar'); return; }
+ fechar(); carregar();
+}
+function exportar(){
+ let csv='Data,Tipo,Nome,Setor,Gravidade,Local,Descricao,Status,Acao,Parecer\n';
+ lista.forEach(r=>{ csv+='"'+(r.data_br||'')+'","'+r.tipo+'","'+r.nome+'","'+r.setor+'","'+r.gravidade+'","'+r.local+'","'+(r.descricao||'').replace(/"/g,'""')+'","'+r.status+'","'+(r.acao_tomada||'').replace(/"/g,'""')+'","'+(r.resposta_admin||'').replace(/"/g,'""')+'"\n'; });
+ let blob=new Blob([csv],{type:'text/csv'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ouvidoria-delipack.csv'; a.click();
+}
+function sair(){ localStorage.removeItem('delipack_token'); location.reload(); }
+if(token){ mostrar(); }
+</script>
+</body></html>}
 function abrir(id){ idAtivo=id; let r=lista.find(x=>x.id==id); document.getElementById('modalInfo').innerHTML='<b>'+r.tipo+' - '+(r.data_br||'')+'</b><br>'+(r.nome||'')+' - '+(r.setor||'')+'<br><br>'+(r.descricao||''); document.getElementById('acao').value=r.acao_tomada||''; document.getElementById('parecer').value=r.resposta_admin||''; document.getElementById('statusFinal').value=r.status||'Novo'; document.getElementById('modal').style.display='flex'; }
 function fechar(){ document.getElementById('modal').style.display='none'; }
 async function salvarResposta(){
