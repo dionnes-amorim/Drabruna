@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Admin Ouvidoria - Delipack</title>
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
@@ -8,19 +9,18 @@
 <style>
 :root{--azul:#0B2A4A;--verde:#00C896} *{margin:0;padding:0;box-sizing:border-box} body{font-family:Inter,sans-serif;background:#F2F5F8}
 .bar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--verde);z-index:100;transition:width.4s}
-.bar.ativo{width:100%;animation:load 1.2s infinite ease-in-out}
-@keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.bar.ativo{width:100%}
 header{background:linear-gradient(135deg,var(--azul),#123c6a);color:white;padding:10px 4%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+/* CORREÇÃO AQUI: COM ESPAÇO */
 header.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px}
-header.brand img{height:32px!important;width:auto!important;max-width:120px;background:white;border-radius:8px;padding:4px 8px;object-fit:contain;display:block}
+header.brand img{height:32px!important;width:120px!important;max-width:120px!important;object-fit:contain;background:white;border-radius:8px;padding:4px 8px;display:block}
 #login{height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0B2A4A,#123c6a);padding:20px}
 .box{background:white;padding:28px;border-radius:18px;width:100%;max-width:360px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
 .box.logo-login{display:flex;justify-content:center;margin-bottom:14px}
-.box.logo-login img{height:48px!important;width:auto!important;max-width:150px!important;object-fit:contain;display:block}
+.box.logo-login img{height:44px!important;width:140px!important;max-width:140px!important;object-fit:contain;display:block}
 input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1.5px solid #ddd;margin:6px 0;outline:none;font-size:14px}
 .btn{background:var(--azul);color:white;padding:13px;border:none;border-radius:10px;width:100%;font-weight:700;cursor:pointer}
-.container{padding:16px 3%}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.card{background:white;border-radius:16px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.05);animation:subir.3s ease}.kpi{font-size:26px;font-weight:800;color:var(--azul)}
-@keyframes subir{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.container{padding:16px 3%}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.card{background:white;border-radius:16px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.05)}.kpi{font-size:26px;font-weight:800;color:var(--azul)}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.filters input{flex:1;min-width:200px}.filters select{min-width:160px;flex:1}
 .table-wrap{background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.05);overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px;min-width:800px}th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}th{background:var(--azul);color:white;font-size:11px;text-transform:uppercase;position:sticky;top:0}
 .btn-resp{padding:8px 14px;border-radius:20px;border:none;background:var(--azul);color:white;font-weight:700;cursor:pointer;font-size:12px}.cards{display:none;grid-template-columns:1fr;gap:12px}.card-relato{background:white;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.05);border-left:5px solid var(--azul)}.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block}.Novo{background:#FFF4CC}.Em{background:#D6E8FF}.Respondido{background:#D1FAE5}.Concluído{background:#c8f7c5}.Arquivado{background:#e5e7eb}
@@ -36,7 +36,7 @@ input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1.5px so
 let lista=[],idAtivo=null,token=localStorage.getItem('delipack_token');
 async function logar(){const b=document.getElementById('btnLogin');const e=document.getElementById('erro');const bar=document.getElementById('bar');b.textContent='Entrando...';b.disabled=true;e.textContent='';bar.classList.add('ativo');try{const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('u').value.trim(),password:document.getElementById('p').value})});const j=await r.json();if(!r.ok){e.textContent=j.error||'Login inválido';b.textContent='Entrar no painel';b.disabled=false;bar.classList.remove('ativo');return;}token=j.token;localStorage.setItem('delipack_token',token);mostrar();}catch{ e.textContent='Servidor acordando... aguarde 20s';b.textContent='Entrar no painel';b.disabled=false;bar.classList.remove('ativo');}}
 function mostrar(){document.getElementById('login').style.display='none';document.getElementById('app').style.display='block';carregar();}
-async function carregar(){const bar=document.getElementById('bar');bar.classList.add('ativo');try{const r=await fetch('/api/relatos',{headers:{Authorization:'Bearer '+token}});if(!r.ok){sair();return;}lista=await r.json();render();}catch{}bar.classList.remove('ativo');bar.style.width='100%';setTimeout(()=>bar.style.width='0%',500);}
+async function carregar(){const bar=document.getElementById('bar');bar.classList.add('ativo');try{const r=await fetch('/api/relatos',{headers:{Authorization:'Bearer '+token}});if(!r.ok){sair();return;}lista=await r.json();render();}catch{}bar.classList.remove('ativo');}
 function render(){let l=[...lista];let q=document.getElementById('busca').value.toLowerCase(),ft=document.getElementById('fTipo').value,fs=document.getElementById('fStatus').value;if(q)l=l.filter(x=>JSON.stringify(x).toLowerCase().includes(q));if(ft)l=l.filter(x=>x.tipo==ft);if(fs)l=l.filter(x=>(x.status||'Novo')==fs);document.getElementById('kpiTotal').textContent=lista.length;document.getElementById('kpiAnon').textContent=lista.filter(x=>x.anonimo).length;document.getElementById('kpiNovos').textContent=lista.filter(x=>x.status=='Novo').length;document.getElementById('kpiResp').textContent=lista.filter(x=>['Respondido','Concluído'].includes(x.status)).length;const tb=document.getElementById('tbody');const cs=document.getElementById('cards');tb.innerHTML='';cs.innerHTML='';l.forEach(r=>{let d=(r.descricao||'').substring(0,90);let ok=r.resposta_admin?'<br><span style="color:green;font-size:11px">✅ Respondido</span>':'';let b='<span class="badge '+(r.status||'Novo').split(' ')[0]+'">'+(r.status||'Novo')+'</span>';tb.innerHTML+='<tr><td>'+(r.data_br||'')+'</td><td><b>'+r.tipo+'</b></td><td>'+(r.anonimo?'🕵️ Anônimo':'🙋 '+r.nome)+'</td><td>'+(r.setor||'')+'</td><td>'+(r.local||'-')+'</td><td style="max-width:200px">'+d+'... '+ok+'</td><td>'+b+'</td><td><button class="btn-resp" onclick="abrir(\''+r.id+'\')">Responder</button></td></tr>';let at='';if(r.resposta_admin){at='<small style="color:green"><b>Acao:</b> '+(r.acao_tomada||'')+'<br><b>Parecer:</b> '+r.resposta_admin+'</small>';}cs.innerHTML+='<div class="card-relato"><div style="display:flex;justify-content:space-between;font-size:12px"><span><b>'+r.tipo+'</b> • '+(r.data_br||'')+'</span><span class="badge '+(r.status||'Novo').split(' ')[0]+'">'+(r.status||'Novo')+'</span></div><div style="display:flex;justify-content:space-between;margin:6px 0;font-size:12px"><span>👤 '+(r.anonimo?'Anônimo':r.nome)+'</span><span>📍 '+(r.local||'-')+'</span></div><div style="font-size:12px">'+(r.setor||'')+'</div><div style="background:#f9fafb;padding:10px;border-radius:10px;font-size:13px;margin:8px 0">'+(r.descricao||'')+'<br>'+at+'</div><button class="btn-resp" style="width:100%" onclick="abrir(\''+r.id+'\')">Responder</button></div>';});}
 function abrir(id){idAtivo=id;let r=lista.find(x=>x.id==id);document.getElementById('modalInfo').innerHTML='<b>'+r.tipo+' - '+(r.data_br||'')+'</b><br>'+(r.nome||'')+' - '+(r.setor||'')+'<br>📍 '+(r.local||'-')+'<br><br>'+(r.descricao||'');document.getElementById('acao').value=r.acao_tomada||'';document.getElementById('parecer').value=r.resposta_admin||'';document.getElementById('statusFinal').value=r.status||'Novo';document.getElementById('modal').style.display='flex';}
 function fechar(){document.getElementById('modal').style.display='none';}
