@@ -7,13 +7,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 :root{--azul:#0B2A4A} *{margin:0;padding:0;box-sizing:border-box} body{font-family:Inter,sans-serif;background:#F2F5F8}
-header{background:linear-gradient(135deg,var(--azul),#123c6a);color:white;padding:10px 4%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
-header.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px}
-header.brand img{height:32px!important;width:auto!important;max-width:120px!important;background:white;border-radius:8px;padding:4px 8px;object-fit:contain;display:block}
+img{max-width:100%;height:auto}
+/* LOGIN - CORREÇÃO DEFINITIVA */
 #login{height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0B2A4A,#123c6a);padding:20px}
 .box{background:white;padding:28px;border-radius:18px;width:100%;max-width:360px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
-.box.logo-login{display:flex;justify-content:center;margin-bottom:14px}
-.box.logo-login img{height:44px!important;width:auto!important;max-width:140px!important;object-fit:contain;display:block;margin:0 auto}
+.logo-login{display:flex;justify-content:center;margin-bottom:14px; width:100%}
+.logo-login img{height:36px!important; width:auto!important; max-width:110px!important; max-height:36px!important; object-fit:contain!important; display:block!important}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px}
+.brand img{height:28px!important;width:auto!important;max-width:100px!important;max-height:28px!important;background:white;border-radius:8px;padding:4px 8px;object-fit:contain!important;display:block!important}
+header{background:linear-gradient(135deg,var(--azul),#123c6a);color:white;padding:10px 4%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
 input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1.5px solid #ddd;margin:6px 0;outline:none;font-size:14px}
 .btn{background:var(--azul);color:white;padding:13px;border:none;border-radius:10px;width:100%;font-weight:700;cursor:pointer}
 .container{padding:16px 3%}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.card{background:white;border-radius:16px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.05)}.kpi{font-size:26px;font-weight:800;color:var(--azul)}
